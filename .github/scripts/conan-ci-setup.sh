@@ -15,6 +15,14 @@ mv "$profile" "${profile}.bak"
 sed 's/^\(compiler\.cppstd=\).\{1,\}$/\1'"$std/" "${profile}.bak" > "$profile"
 rm "${profile}.bak"
 
+# Add lines to global.conf
+global_conf="$HOME/.conan2/global.conf"
+mkdir -p "$(dirname "$global_conf")"
+{
+  echo "tools.system.package_manager:mode = install"
+  echo "tools.system.package_manager:sudo = true"
+} >> "$global_conf"
+
 if [ -f conan_cache_save.tgz ]; then
   conan cache restore conan_cache_save.tgz
 fi

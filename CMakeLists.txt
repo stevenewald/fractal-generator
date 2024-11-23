@@ -18,6 +18,7 @@ include(cmake/variables.cmake)
 add_library(
     fractal-generator_lib OBJECT
     source/lib.cpp
+    source/graphics/basic_display.cpp
 )
 
 target_include_directories(
