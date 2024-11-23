@@ -1,14 +1,4 @@
 #include "graphics/basic_display.hpp"
-
-void display_line()
-{
-    fractal::BasicDisplay display;
-    for (std::size_t i = 0; i < 100; i++) {
-        display.set_pixel(100, 100 + i, 255);
-    }
-    display.display_window();
-}
-
 #include "lib.hpp"
 
 #include <argparse/argparse.hpp>
@@ -19,10 +9,10 @@ void display_line()
 #include <iostream>
 #include <string>
 
-constexpr double divergence_norm = 4;
-constexpr double x_dim = 2;
-constexpr double y_dim = 2;
-constexpr int max_iterations = 50;
+constexpr double DIVERGENCE_NORM = 4;
+constexpr double X_DIM = 2;
+constexpr double Y_DIM = 2;
+constexpr int MAX_ITERATIONS = 50;
 
 // https://en.wikipedia.org/wiki/Mandelbrot_set#Formal_definition
 std::complex<double> step(std::complex<double> z_n, std::complex<double> constant)
@@ -37,12 +27,48 @@ int compute_iterations(
     int iterations = 0;
     std::complex<double> z_n = z_0;
 
-    while (iterations < max_iters && std::norm(z_n) < divergence_norm) {
+    while (iterations < max_iters && std::norm(z_n) < DIVERGENCE_NORM) {
         z_n = step(z_n, constant);
         ++iterations;
     }
 
     return iterations;
+}
+
+void display_line()
+{
+    fractal::BasicDisplay display;
+    for (std::size_t i = 0; i < 100; i++) {
+        display.set_pixel(100, 100 + i, 255);
+    }
+    display.display_window();
+}
+
+void display_julia(std::size_t width, std::size_t height, std::complex<double> constant)
+{
+    fractal::BasicDisplay display;
+
+    auto x_step = X_DIM * 2 / static_cast<double>(width);
+    auto y_step = Y_DIM * 2 / static_cast<double>(height);
+
+    for (std::size_t j = 0; j < height; ++j) {
+        for (std::size_t i = 0; i < width; ++i) {
+            // Compute complex coordinates from pixel index
+            double x = -X_DIM + i * x_step;
+            double y = -Y_DIM + j * y_step;
+
+            // Compute the number of iterations
+            auto iterations = compute_iterations({x, y}, constant, MAX_ITERATIONS);
+
+            // Draw the pixel
+            display.set_pixel(
+                i, j,
+                static_cast<int>(iterations / static_cast<double>(MAX_ITERATIONS) * 255)
+            );
+        }
+    }
+
+    display.display_window();
 }
 
 int main(int argc, char** argv)
@@ -68,21 +94,10 @@ int main(int argc, char** argv)
         return 1;
     }
 
-    auto width = static_cast<double>(program.get<int>("width"));
-    auto height = static_cast<double>(program.get<int>("height"));
+    auto width = program.get<int>("width");
+    auto height = program.get<int>("height");
 
-    auto x_step = x_dim * 2 / width;
-    auto y_step = y_dim * 2 / height;
-
-    std::complex<double> constant = {1.0 / 4, 0};
-
-    for (auto y = -y_dim; y < y_dim; y += y_step) {
-        for (auto x = -x_dim; x < x_dim; x += x_step) {
-            auto iterations = compute_iterations({x, y}, constant, max_iterations);
-            std::cout << iterations << ' ';
-        }
-        std::cout << '\n';
-    }
+    display_julia(width, height, {1.0 / 4, 0});
 
     return 0;
 }
