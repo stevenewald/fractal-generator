@@ -1,12 +1,11 @@
-#include <iostream>
-#include <string>
+#include "graphics/basic_display.hpp"
 
-#include "lib.hpp"
-
-auto main() -> int
+int main()
 {
-  auto const lib = library {};
-  auto const message = "Hello from " + lib.name + "!";
-  std::cout << message << '\n';
-  return 0;
+    fractal::BasicDisplay display;
+    for (std::size_t i = 0; i < 100; i++) {
+        display.set_pixel(100, 100 + i, 255);
+    }
+    display.display_window();
+    return 0;
 }

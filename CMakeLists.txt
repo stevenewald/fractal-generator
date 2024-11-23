@@ -18,6 +18,7 @@ include(cmake/variables.cmake)
 add_library(
     fractal-generator_lib OBJECT
     source/lib.cpp
+    source/graphics/basic_display.cpp
 )
 
 target_include_directories(
@@ -31,6 +32,9 @@ target_compile_features(fractal-generator_lib PUBLIC cxx_std_20)
 find_package(fmt REQUIRED)
 target_link_libraries(fractal-generator_lib PRIVATE fmt::fmt)
 
+find_package(SFML REQUIRED graphics CONFIG)
+target_link_libraries(fractal-generator_lib PUBLIC sfml-graphics)
+
 # ---- Declare executable ----
 
 add_executable(fractal-generator_exe source/main.cpp)
@@ -41,6 +45,7 @@ set_property(TARGET fractal-generator_exe PROPERTY OUTPUT_NAME fractal-generator
 target_compile_features(fractal-generator_exe PRIVATE cxx_std_20)
 
 target_link_libraries(fractal-generator_exe PRIVATE fractal-generator_lib)
+target_link_libraries(fractal-generator_exe PUBLIC sfml-graphics)
 
 # ---- Install rules ----
 

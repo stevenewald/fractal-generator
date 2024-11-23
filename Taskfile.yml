@@ -48,3 +48,8 @@ tasks:
     cmds:
       - task: build
       - ctest {{.TEST_FLAGS}}
+
+  fmt:
+    dir: .
+    cmds:
+      - cmake -D FIX=YES -P cmake/lint.cmake
