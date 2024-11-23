@@ -53,14 +53,39 @@ void display_julia(std::size_t width, std::size_t height, std::complex<double> c
 
     for (std::size_t j = 0; j < height; ++j) {
         for (std::size_t i = 0; i < width; ++i) {
+            double x = -X_DIM + i * x_step;
+            double y = -Y_DIM + j * y_step;
+
+            auto iterations = compute_iterations({x, y}, constant, MAX_ITERATIONS);
+
+            display.set_pixel(
+                i, j,
+                static_cast<int>(iterations / static_cast<double>(MAX_ITERATIONS) * 255)
+            );
+        }
+    }
+
+    display.display_window();
+}
+
+void display_mandelbrot(
+    std::size_t width, std::size_t height, std::complex<double> constant
+)
+{
+    fractal::BasicDisplay display;
+
+    auto x_step = X_DIM * 2 / static_cast<double>(width);
+    auto y_step = Y_DIM * 2 / static_cast<double>(height);
+
+    for (std::size_t j = 0; j < height; ++j) {
+        for (std::size_t i = 0; i < width; ++i) {
             // Compute complex coordinates from pixel index
             double x = -X_DIM + i * x_step;
             double y = -Y_DIM + j * y_step;
 
             // Compute the number of iterations
-            auto iterations = compute_iterations({x, y}, constant, MAX_ITERATIONS);
+            auto iterations = compute_iterations(constant, {x, y}, MAX_ITERATIONS);
 
-            // Draw the pixel
             display.set_pixel(
                 i, j,
                 static_cast<int>(iterations / static_cast<double>(MAX_ITERATIONS) * 255)
@@ -97,7 +122,7 @@ int main(int argc, char** argv)
     auto width = program.get<int>("width");
     auto height = program.get<int>("height");
 
-    display_julia(width, height, {1.0 / 4, 0});
+    display_mandelbrot(width, height, {0, 0});
 
     return 0;
 }
