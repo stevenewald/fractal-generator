@@ -19,6 +19,7 @@ add_library(
     fractal-generator_lib OBJECT
     source/lib.cpp
     source/graphics/basic_display.cpp
+    source/graphics/color_conversions.cpp
 )
 
 target_include_directories(

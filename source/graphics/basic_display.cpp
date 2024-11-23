@@ -1,13 +1,27 @@
 #include "basic_display.hpp"
 
+#include "graphics/color_conversions.hpp"
+
 #include <fmt/format.h>
 #include <SFML/Graphics.hpp>
 #include <SFML/Graphics/RectangleShape.hpp>
 
+#include <cmath>
+
 namespace fractal {
-void BasicDisplay::set_pixel(std::size_t x_pos, std::size_t y_pos, uint8_t value)
+void BasicDisplay::set_pixel(display_coordinate coordinate, uint16_t value)
 {
-    pixels_.at(x_pos).at(y_pos) = value;
+    pixels_.at(coordinate.first).at(coordinate.second) = value;
+}
+
+std::tuple<int, int, int> interpolateColor(
+    float t, std::tuple<int, int, int> color1, std::tuple<int, int, int> color2
+)
+{
+    int r = std::get<0>(color1) + t * (std::get<0>(color2) - std::get<0>(color1));
+    int g = std::get<1>(color1) + t * (std::get<1>(color2) - std::get<1>(color1));
+    int b = std::get<2>(color1) + t * (std::get<2>(color2) - std::get<2>(color1));
+    return {r, g, b};
 }
 
 void BasicDisplay::display_window()
@@ -20,10 +34,12 @@ void BasicDisplay::display_window()
     image.create(WINDOW_WIDTH, WINDOW_HEIGHT);
     for (std::size_t x_pos = 0; x_pos < WINDOW_WIDTH; ++x_pos) {
         for (std::size_t y_pos = 0; y_pos < WINDOW_HEIGHT; ++y_pos) {
-            std::uint8_t pixel_value = pixels_.at(x_pos).at(y_pos);
+            std::uint16_t pixel_value = pixels_.at(x_pos).at(y_pos);
+            auto tuple = number_to_rgb(pixel_value);
+
             image.setPixel(
                 static_cast<unsigned int>(x_pos), static_cast<unsigned int>(y_pos),
-                sf::Color(pixel_value, pixel_value, pixel_value)
+                sf::Color(std::get<0>(tuple), std::get<1>(tuple), std::get<2>(tuple))
             );
         }
     }
