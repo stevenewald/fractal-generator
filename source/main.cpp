@@ -1,31 +1,38 @@
+#include "config.hpp"
+#include "coordinates.hpp"
 #include "graphics/basic_display.hpp"
-#include "lib.hpp"
+#include "graphics/display_to_complex.hpp"
 
 #include <argparse/argparse.hpp>
 
 #include <complex>
 
-#include <exception>
-#include <iostream>
-#include <string>
+#include <algorithm>
+#include <limits>
 
-constexpr double DIVERGENCE_NORM = 4;
-constexpr double X_DIM = 2;
-constexpr double Y_DIM = 2;
-constexpr int MAX_ITERATIONS = 50;
+constexpr float DIVERGENCE_NORM = 4;
+constexpr fractal::display_domain DISPLAY_DOMAIN{
+    {0,   0  },
+    {799, 599}
+};
+constexpr fractal::complex_domain COMPLEX_DOMAIN{
+    {-2, -1.5},
+    {1,  1.5 }
+};
+constexpr std::size_t MAX_ITERATIONS = 50;
 
 // https://en.wikipedia.org/wiki/Mandelbrot_set#Formal_definition
-std::complex<double> step(std::complex<double> z_n, std::complex<double> constant)
+std::complex<float> step(std::complex<float> z_n, std::complex<float> constant)
 {
     return z_n * z_n + constant;
 }
 
-int compute_iterations(
-    std::complex<double> z_0, std::complex<double> constant, int max_iters
+std::size_t compute_iterations(
+    std::complex<float> z_0, std::complex<float> constant, std::size_t max_iters
 )
 {
-    int iterations = 0;
-    std::complex<double> z_n = z_0;
+    std::size_t iterations = 0;
+    std::complex<float> z_n = z_0;
 
     while (iterations < max_iters && std::norm(z_n) < DIVERGENCE_NORM) {
         z_n = step(z_n, constant);
@@ -35,70 +42,38 @@ int compute_iterations(
     return iterations;
 }
 
-void display_line()
-{
-    fractal::BasicDisplay display;
-    for (std::size_t i = 0; i < 100; i++) {
-        display.set_pixel(100, 100 + i, 255);
-    }
-    display.display_window();
-}
-
-void display_julia(std::size_t width, std::size_t height, std::complex<double> constant)
+void display_mandelbrot()
 {
     fractal::BasicDisplay display;
 
-    auto x_step = X_DIM * 2 / static_cast<double>(width);
-    auto y_step = Y_DIM * 2 / static_cast<double>(height);
+    fractal::DisplayToComplexCoordinates to_complex{
+        DISPLAY_DOMAIN.end_coordinate, COMPLEX_DOMAIN
+    };
 
-    for (std::size_t j = 0; j < height; ++j) {
-        for (std::size_t i = 0; i < width; ++i) {
-            double x = -X_DIM + i * x_step;
-            double y = -Y_DIM + j * y_step;
+    auto process_coordinate = [&](const fractal::display_coordinate& coord) {
+        auto complex_coord = to_complex.to_complex_projection(coord);
 
-            auto iterations = compute_iterations({x, y}, constant, MAX_ITERATIONS);
+        // Compute the number of iterations
+        auto iterations = compute_iterations({0, 0}, complex_coord, MAX_ITERATIONS);
 
-            display.set_pixel(
-                i, j,
-                static_cast<int>(iterations / static_cast<double>(MAX_ITERATIONS) * 255)
-            );
-        }
-    }
+        display.set_pixel(
+            coord,
+            static_cast<uint16_t>(
+                (static_cast<float>(iterations) / static_cast<float>(MAX_ITERATIONS))
+                * std::numeric_limits<uint16_t>::max()
+            )
+        );
+    };
+
+    std::for_each(DISPLAY_DOMAIN.begin(), DISPLAY_DOMAIN.end(), process_coordinate);
 
     display.display_window();
 }
 
-void display_mandelbrot(
-    std::size_t width, std::size_t height, std::complex<double> constant
-)
+int main()
 {
-    fractal::BasicDisplay display;
-
-    auto x_step = X_DIM * 2 / static_cast<double>(width);
-    auto y_step = Y_DIM * 2 / static_cast<double>(height);
-
-    for (std::size_t j = 0; j < height; ++j) {
-        for (std::size_t i = 0; i < width; ++i) {
-            // Compute complex coordinates from pixel index
-            double x = -X_DIM + i * x_step;
-            double y = -Y_DIM + j * y_step;
-
-            // Compute the number of iterations
-            auto iterations = compute_iterations(constant, {x, y}, MAX_ITERATIONS);
-
-            display.set_pixel(
-                i, j,
-                static_cast<int>(iterations / static_cast<double>(MAX_ITERATIONS) * 255)
-            );
-        }
-    }
-
-    display.display_window();
-}
-
-int main(int argc, char** argv)
-{
-    auto const lib = library{};
+    // TODO: actually use this
+    /*
     argparse::ArgumentParser program(lib.name);
 
     program.add_argument("width")
@@ -121,8 +96,9 @@ int main(int argc, char** argv)
 
     auto width = program.get<int>("width");
     auto height = program.get<int>("height");
+    */
 
-    display_mandelbrot(width, height, {0, 0});
+    display_mandelbrot();
 
     return 0;
 }
