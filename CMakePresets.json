@@ -83,7 +83,7 @@
     {
       "name": "ci-darwin",
       "inherits": ["flags-appleclang", "ci-std"],
-      "generator": "Xcode",
+      "generator": "Unix Makefiles",
       "hidden": true,
       "cacheVariables": {
         "CMAKE_CATCH_DISCOVER_TESTS_DISCOVERY_MODE": "PRE_TEST"

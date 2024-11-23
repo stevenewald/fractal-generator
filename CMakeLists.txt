@@ -30,7 +30,9 @@ target_include_directories(
 target_compile_features(fractal-generator_lib PUBLIC cxx_std_20)
 
 find_package(fmt REQUIRED)
-target_link_libraries(fractal-generator_lib PRIVATE fmt::fmt)
+find_package(argparse REQUIRED)
+target_link_libraries(fractal-generator_lib PUBLIC fmt::fmt)
+target_link_libraries(fractal-generator_lib PUBLIC argparse::argparse)
 
 find_package(SFML REQUIRED graphics CONFIG)
 target_link_libraries(fractal-generator_lib PUBLIC sfml-graphics)
