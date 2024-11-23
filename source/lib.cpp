@@ -2,7 +2,4 @@
 
 #include <fmt/core.h>
 
-library::library()
-    : name {fmt::format("{}", "fractal-generator")}
-{
-}
+library::library() : name{fmt::format("{}", "fractal-generator")} {}
