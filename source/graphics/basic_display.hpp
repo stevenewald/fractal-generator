@@ -16,8 +16,10 @@ class BasicDisplay {
     std::function<void(sf::Vector2f, sf::Vector2f)> on_resize_;
 
 public:
-    explicit BasicDisplay(std::function<void(sf::Vector2f, sf::Vector2f)> on_resize) :
-        on_resize_(std::move(on_resize))
+    explicit BasicDisplay(
+        std::function<void(sf::Vector2f, sf::Vector2f)> on_resize = [](sf::Vector2f,
+                                                                       sf::Vector2f) {}
+    ) : on_resize_(std::move(on_resize))
     {}
 
     void set_pixel(std::size_t x_pos, std::size_t y_pos, std::uint8_t value);
