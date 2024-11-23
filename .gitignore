@@ -10,3 +10,5 @@ prefix/
 CMakeLists.txt.user
 compile_commands.json
 conan_cache_*.tgz
+CMakeUserPresets.json
+.cache
