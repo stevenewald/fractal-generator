@@ -9,20 +9,21 @@
 #include <complex>
 
 #include <algorithm>
+#include <execution>
 #include <limits>
 
 namespace fractal {
 
-constexpr complex_underlying DIVERGENCE_NORM = 4;
-constexpr display_domain DISPLAY_DOMAIN{
-    {0,   0  },
-    {799, 599}
+const complex_underlying DIVERGENCE_NORM = 4;
+const display_domain DISPLAY_DOMAIN{
+    {0,                0                },
+    {WINDOW_WIDTH - 1, WINDOW_HEIGHT - 1}
 };
-constexpr complex_domain COMPLEX_DOMAIN{
-    {-2, -1.5},
-    {1,  1.5 }
+const complex_domain COMPLEX_DOMAIN{
+    {complex_underlying{-2}, complex_underlying{-1.5}},
+    {complex_underlying{1},  complex_underlying{1.5} }
 };
-constexpr std::size_t MAX_ITERATIONS = 50;
+constexpr std::size_t MAX_ITERATIONS = 512;
 
 // https://en.wikipedia.org/wiki/Mandelbrot_set#Formal_definition
 std::complex<complex_underlying>
@@ -78,7 +79,10 @@ void display_mandelbrot()
             );
         };
 
-        std::for_each(DISPLAY_DOMAIN.begin(), DISPLAY_DOMAIN.end(), process_coordinate);
+        std::for_each(
+            std::execution::par_unseq, DISPLAY_DOMAIN.begin(), DISPLAY_DOMAIN.end(),
+            process_coordinate
+        );
 
         display.display_window();
     }

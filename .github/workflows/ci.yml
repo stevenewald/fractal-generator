@@ -19,11 +19,18 @@ jobs:
     - uses: actions/setup-python@v5
       with: { python-version: "3.12" }
 
+    - name: Install LLVM 18
+      run: |
+          wget -qO- https://apt.llvm.org/llvm-snapshot.gpg.key | sudo tee /etc/apt/trusted.gpg.d/apt.llvm.org.asc
+          sudo apt-add-repository "deb http://apt.llvm.org/jammy/ llvm-toolchain-jammy-18 main"
+          sudo apt update
+          sudo apt install llvm-18 llvm-18-dev llvm-18-tools clang-18 clang-tidy-18 clang-format-18 clang-tools-18 libclang-18-dev -y
+
     - name: Install codespell
       run: pip3 install codespell
 
     - name: Lint
-      run: cmake -D FORMAT_COMMAND=clang-format-14 -P cmake/lint.cmake
+      run: cmake -D FORMAT_COMMAND=clang-format-18 -P cmake/lint.cmake
 
     - name: Spell check
       if: always()
@@ -34,7 +41,7 @@ jobs:
 
     runs-on: ubuntu-22.04
 
-    env: { CXX: clang++-14 }
+    env: { CXX: clang++-18 }
 
     steps:
     - uses: actions/checkout@v4
@@ -42,6 +49,13 @@ jobs:
     - name: Install Python
       uses: actions/setup-python@v5
       with: { python-version: "3.12" }
+
+    - name: Install LLVM 18
+      run: |
+          wget -qO- https://apt.llvm.org/llvm-snapshot.gpg.key | sudo tee /etc/apt/trusted.gpg.d/apt.llvm.org.asc
+          sudo apt-add-repository "deb http://apt.llvm.org/jammy/ llvm-toolchain-jammy-18 main"
+          sudo apt update
+          sudo apt install llvm-18 llvm-18-dev llvm-18-tools clang-18 clang-tidy-18 clang-format-18 clang-tools-18 libclang-18-dev -y
 
     - name: Conan cache
       uses: actions/cache@v4
@@ -76,21 +90,28 @@ jobs:
 
     strategy:
       matrix:
-        os: [macos-14, ubuntu-22.04]
+        os: [ubuntu-22.04]
 
     runs-on: ${{ matrix.os }}
 
     steps:
     - uses: actions/checkout@v4
 
+    - name: Install LLVM 18
+      run: |
+          wget -qO- https://apt.llvm.org/llvm-snapshot.gpg.key | sudo tee /etc/apt/trusted.gpg.d/apt.llvm.org.asc
+          sudo apt-add-repository "deb http://apt.llvm.org/jammy/ llvm-toolchain-jammy-18 main"
+          sudo apt update
+          sudo apt install llvm-18 llvm-18-dev llvm-18-tools clang-18 clang-tidy-18 clang-format-18 clang-tools-18 libclang-18-dev -y
+
     - name: Install static analyzers
       if: matrix.os == 'ubuntu-22.04'
       run: >-
-        sudo apt-get install clang-tidy-14 cppcheck -y -q
+        sudo apt-get install clang-tidy-18 cppcheck -y -q
 
         sudo update-alternatives --install
         /usr/bin/clang-tidy clang-tidy
-        /usr/bin/clang-tidy-14 140
+        /usr/bin/clang-tidy-18 140
 
     - name: Install Python
       uses: actions/setup-python@v5
