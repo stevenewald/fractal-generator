@@ -10,29 +10,31 @@
 #include <algorithm>
 #include <limits>
 
-constexpr float DIVERGENCE_NORM = 4;
-constexpr fractal::display_domain DISPLAY_DOMAIN{
+namespace fractal {
+
+constexpr double DIVERGENCE_NORM = 4;
+constexpr display_domain DISPLAY_DOMAIN{
     {0,   0  },
     {799, 599}
 };
-constexpr fractal::complex_domain COMPLEX_DOMAIN{
+constexpr complex_domain COMPLEX_DOMAIN{
     {-2, -1.5},
     {1,  1.5 }
 };
 constexpr std::size_t MAX_ITERATIONS = 50;
 
 // https://en.wikipedia.org/wiki/Mandelbrot_set#Formal_definition
-std::complex<float> step(std::complex<float> z_n, std::complex<float> constant)
+std::complex<double> step(std::complex<double> z_n, std::complex<double> constant)
 {
     return z_n * z_n + constant;
 }
 
 std::size_t compute_iterations(
-    std::complex<float> z_0, std::complex<float> constant, std::size_t max_iters
+    std::complex<double> z_0, std::complex<double> constant, std::size_t max_iters
 )
 {
     std::size_t iterations = 0;
-    std::complex<float> z_n = z_0;
+    std::complex<double> z_n = z_0;
 
     while (iterations < max_iters && std::norm(z_n) < DIVERGENCE_NORM) {
         z_n = step(z_n, constant);
@@ -44,31 +46,41 @@ std::size_t compute_iterations(
 
 void display_mandelbrot()
 {
-    fractal::BasicDisplay display;
+    complex_domain domain = COMPLEX_DOMAIN;
+    DisplayToComplexCoordinates to_complex{DISPLAY_DOMAIN.end_coordinate, domain};
 
-    fractal::DisplayToComplexCoordinates to_complex{
-        DISPLAY_DOMAIN.end_coordinate, COMPLEX_DOMAIN
+    auto on_resize = [&](sf::Vector2f first, sf::Vector2f second) {
+        complex_coordinate top = to_complex.to_complex_projection({first.x, first.y});
+        complex_coordinate bottom =
+            to_complex.to_complex_projection({second.x, second.y});
+        to_complex = {
+            DISPLAY_DOMAIN.end_coordinate, {top, bottom}
+        };
     };
+    BasicDisplay display(on_resize);
 
-    auto process_coordinate = [&](const fractal::display_coordinate& coord) {
-        auto complex_coord = to_complex.to_complex_projection(coord);
+    while (true) {
+        auto process_coordinate = [&](const display_coordinate& coord) {
+            auto complex_coord = to_complex.to_complex_projection(coord);
 
-        // Compute the number of iterations
-        auto iterations = compute_iterations({0, 0}, complex_coord, MAX_ITERATIONS);
+            // Compute the number of iterations
+            auto iterations = compute_iterations({0, 0}, complex_coord, MAX_ITERATIONS);
 
-        display.set_pixel(
-            coord,
-            static_cast<uint16_t>(
-                (static_cast<float>(iterations) / static_cast<float>(MAX_ITERATIONS))
-                * std::numeric_limits<uint16_t>::max()
-            )
-        );
-    };
+            display.set_pixel(
+                coord, static_cast<uint16_t>(
+                           (static_cast<float>(iterations)
+                            / static_cast<float>(MAX_ITERATIONS))
+                           * std::numeric_limits<uint16_t>::max()
+                       )
+            );
+        };
 
-    std::for_each(DISPLAY_DOMAIN.begin(), DISPLAY_DOMAIN.end(), process_coordinate);
+        std::for_each(DISPLAY_DOMAIN.begin(), DISPLAY_DOMAIN.end(), process_coordinate);
 
-    display.display_window();
+        display.display_window();
+    }
 }
+} // namespace fractal
 
 int main()
 {
@@ -98,7 +110,7 @@ int main()
     auto height = program.get<int>("height");
     */
 
-    display_mandelbrot();
+    fractal::display_mandelbrot();
 
     return 0;
 }

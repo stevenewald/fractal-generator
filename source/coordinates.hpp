@@ -4,7 +4,7 @@
 
 namespace fractal {
 using display_coordinate = std::pair<uint16_t, uint16_t>;
-using complex_coordinate = std::complex<float>;
+using complex_coordinate = std::complex<double>;
 
 struct display_domain {
     display_coordinate start_coordinate;
@@ -52,12 +52,12 @@ struct complex_domain {
     complex_coordinate end_coordinate;
 };
 
-inline float real_domain_size(const complex_domain& domain)
+inline double real_domain_size(const complex_domain& domain)
 {
     return domain.end_coordinate.real() - domain.start_coordinate.real();
 }
 
-inline float imaginary_domain_size(const complex_domain& domain)
+inline double imaginary_domain_size(const complex_domain& domain)
 {
     return domain.end_coordinate.imag() - domain.start_coordinate.imag();
 }
