@@ -2,6 +2,7 @@
 #include "coordinates.hpp"
 #include "graphics/basic_display.hpp"
 #include "graphics/display_to_complex.hpp"
+#include "units.hpp"
 
 #include <argparse/argparse.hpp>
 
@@ -12,7 +13,7 @@
 
 namespace fractal {
 
-constexpr double DIVERGENCE_NORM = 4;
+constexpr complex_underlying DIVERGENCE_NORM = 4;
 constexpr display_domain DISPLAY_DOMAIN{
     {0,   0  },
     {799, 599}
@@ -24,17 +25,19 @@ constexpr complex_domain COMPLEX_DOMAIN{
 constexpr std::size_t MAX_ITERATIONS = 50;
 
 // https://en.wikipedia.org/wiki/Mandelbrot_set#Formal_definition
-std::complex<double> step(std::complex<double> z_n, std::complex<double> constant)
+std::complex<complex_underlying>
+step(std::complex<complex_underlying> z_n, std::complex<complex_underlying> constant)
 {
     return z_n * z_n + constant;
 }
 
 std::size_t compute_iterations(
-    std::complex<double> z_0, std::complex<double> constant, std::size_t max_iters
+    std::complex<complex_underlying> z_0, std::complex<complex_underlying> constant,
+    std::size_t max_iters
 )
 {
     std::size_t iterations = 0;
-    std::complex<double> z_n = z_0;
+    std::complex<complex_underlying> z_n = z_0;
 
     while (iterations < max_iters && std::norm(z_n) < DIVERGENCE_NORM) {
         z_n = step(z_n, constant);
