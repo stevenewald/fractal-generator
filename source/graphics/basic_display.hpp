@@ -1,34 +1,29 @@
 #pragma once
 
 #include "config.hpp"
-#include "coordinates.hpp"
+#include "graphics/display_event_observer.hpp"
 
 #include <SFML/Graphics.hpp>
 #include <SFML/Graphics/RectangleShape.hpp>
 #include <SFML/System/Vector2.hpp>
 
-#include <cstdint>
-
-#include <functional>
+#include <memory>
 #include <utility>
+#include <vector>
 
 namespace fractal {
 class BasicDisplay {
     sf::RenderWindow window_{sf::VideoMode(WINDOW_WIDTH, WINDOW_HEIGHT), "SFML Window"};
-    sf::Image image_;
-    sf::Texture texture_;
-    std::function<void(sf::Vector2f, sf::Vector2f)> on_resize_;
+    std::vector<std::shared_ptr<DisplayEventObserver>> observers_;
 
 public:
-    explicit BasicDisplay(std::function<void(sf::Vector2f, sf::Vector2f)> on_resize
+    explicit BasicDisplay() { window_.setFramerateLimit(FRAME_RATE); }
 
-    ) : on_resize_(std::move(on_resize))
+    void add_observer(std::shared_ptr<DisplayEventObserver> observer)
     {
-        window_.setFramerateLimit(FRAME_RATE);
-        image_.create(WINDOW_WIDTH, WINDOW_HEIGHT);
+        observers_.push_back(std::move(observer));
     }
 
-    void set_pixel(display_coordinate coordinate, uint16_t value);
     void display_window();
 };
 } // namespace fractal

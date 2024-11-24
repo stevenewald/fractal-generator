@@ -14,4 +14,10 @@ using small_float = boost::multiprecision::cpp_bin_float<
 // using complex_underlying = boost::multiprecision::number<small_float>;
 // using complex = boost::multiprecision::complex_adaptor<small_float>;
 using complex_underlying = double;
+
+struct color {
+    uint8_t red;
+    uint8_t green;
+    uint8_t blue;
+};
 } // namespace fractal
