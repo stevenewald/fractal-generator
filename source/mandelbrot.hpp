@@ -47,7 +47,6 @@ class Mandelbrot : public DisplayEventObserver {
     complex_domain domain_ = START_COMPLEX_DOMAIN;
     sf::Image image_;
     sf::Texture texture_;
-    sf::Sprite sprite_{texture_};
     int start_x{};
     int start_y{};
 
@@ -105,15 +104,12 @@ public:
         flush_buffer();
     }
 
-    void flush_buffer()
+    void flush_buffer() {}
+
+    std::optional<std::unique_ptr<sf::Drawable>> get_drawable() override
     {
         texture_.loadFromImage(image_);
-        sprite_ = sf::Sprite{texture_};
-    }
-
-    std::optional<std::reference_wrapper<sf::Drawable>> get_drawable() override
-    {
-        return sprite_;
+        return std::make_unique<sf::Sprite>(texture_);
     }
 };
 } // namespace fractal

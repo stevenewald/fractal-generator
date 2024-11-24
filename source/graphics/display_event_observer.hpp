@@ -15,7 +15,7 @@ public:
 
     virtual void on_mouse_button_released(const sf::Event::MouseButtonEvent&) {}
 
-    virtual std::optional<std::reference_wrapper<sf::Drawable>> get_drawable() = 0;
+    virtual std::optional<std::unique_ptr<sf::Drawable>> get_drawable() = 0;
 
     DisplayEventObserver() = default;
     DisplayEventObserver(DisplayEventObserver&&) = default;

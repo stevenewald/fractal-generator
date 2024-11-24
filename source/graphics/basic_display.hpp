@@ -14,16 +14,16 @@
 namespace fractal {
 class BasicDisplay {
     sf::RenderWindow window_{sf::VideoMode(WINDOW_WIDTH, WINDOW_HEIGHT), "SFML Window"};
-    std::vector<std::shared_ptr<DisplayEventObserver>> observers_;
+    std::vector<std::unique_ptr<DisplayEventObserver>> observers_;
+
+    void handle_event_(const sf::Event& event);
 
 public:
     explicit BasicDisplay() { window_.setFramerateLimit(FRAME_RATE); }
 
-    void add_observer(std::shared_ptr<DisplayEventObserver> observer)
-    {
-        observers_.push_back(std::move(observer));
-    }
+    void add_observer(std::unique_ptr<DisplayEventObserver> observer);
 
+    void poll_window_events();
     void display_window();
 };
 } // namespace fractal
