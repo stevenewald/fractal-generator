@@ -1,38 +1,40 @@
 #pragma once
 
 #include "coordinates.hpp"
+#include "units.hpp"
 
 #include <complex>
 
 namespace fractal {
 class DisplayToComplexCoordinates {
-    double real_scaling_factor_;
-    double imaginary_scaling_factor_;
+    complex_underlying real_scaling_factor_;
+    complex_underlying imaginary_scaling_factor_;
     complex_coordinate complex_domain_start_;
 
-    static double real_scaling_factor(
+    static complex_underlying real_scaling_factor(
         const display_coordinate& display_top_right,
         const complex_domain& complex_domain
     )
     {
-        double real_d_size = real_domain_size(complex_domain);
-        return real_d_size / static_cast<double>(display_top_right.first);
+        complex_underlying real_d_size = real_domain_size(complex_domain);
+        return real_d_size / static_cast<complex_underlying>(display_top_right.first);
     }
 
-    static double imaginary_scaling_factor(
+    static complex_underlying imaginary_scaling_factor(
         const display_coordinate& display_top_right,
         const complex_domain& complex_domain
     )
     {
-        double imaginary_d_size = imaginary_domain_size(complex_domain);
-        return imaginary_d_size / static_cast<double>(display_top_right.second);
+        complex_underlying imaginary_d_size = imaginary_domain_size(complex_domain);
+        return imaginary_d_size
+               / static_cast<complex_underlying>(display_top_right.second);
     }
 
     static complex_coordinate to_complex(display_coordinate coordinate)
     {
         return {
-            static_cast<double>(coordinate.first),
-            static_cast<double>(coordinate.second)
+            static_cast<complex_underlying>(coordinate.first),
+            static_cast<complex_underlying>(coordinate.second)
         };
     }
 
@@ -49,7 +51,7 @@ public:
 
     complex_coordinate to_complex_projection(display_coordinate display_coord)
     {
-        std::complex<double> raw_complex_coord = to_complex(display_coord);
+        std::complex<complex_underlying> raw_complex_coord = to_complex(display_coord);
         std::complex offset = {
             real_scaling_factor_ * raw_complex_coord.real(),
             imaginary_scaling_factor_ * raw_complex_coord.imag()

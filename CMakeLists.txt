@@ -32,11 +32,12 @@ target_compile_features(fractal-generator_lib PUBLIC cxx_std_20)
 
 find_package(fmt REQUIRED)
 find_package(argparse REQUIRED)
-target_link_libraries(fractal-generator_lib PUBLIC fmt::fmt)
-target_link_libraries(fractal-generator_lib PUBLIC argparse::argparse)
-
+find_package(Boost REQUIRED)
 find_package(SFML REQUIRED graphics CONFIG)
-target_link_libraries(fractal-generator_lib PUBLIC sfml-graphics)
+target_link_libraries(fractal-generator_lib PRIVATE fmt::fmt)
+target_link_libraries(fractal-generator_lib PRIVATE argparse::argparse)
+target_link_libraries(fractal-generator_lib PRIVATE boost::boost)
+target_link_libraries(fractal-generator_lib PRIVATE sfml-graphics)
 
 # ---- Declare executable ----
 
@@ -48,7 +49,9 @@ set_property(TARGET fractal-generator_exe PROPERTY OUTPUT_NAME fractal-generator
 target_compile_features(fractal-generator_exe PRIVATE cxx_std_20)
 
 target_link_libraries(fractal-generator_exe PRIVATE fractal-generator_lib)
-target_link_libraries(fractal-generator_exe PUBLIC sfml-graphics)
+target_link_libraries(fractal-generator_exe PRIVATE argparse::argparse)
+target_link_libraries(fractal-generator_exe PRIVATE sfml-graphics)
+target_link_libraries(fractal-generator_exe PRIVATE boost::boost)
 
 # ---- Install rules ----
 
