@@ -1,54 +1,61 @@
 #include "basic_display.hpp"
 
+#include "coordinates.hpp"
 #include "graphics/color_conversions.hpp"
 
 #include <fmt/format.h>
-#include <SFML/Graphics.hpp>
-#include <SFML/Graphics/RectangleShape.hpp>
 
 #include <cmath>
 
 namespace fractal {
 void BasicDisplay::set_pixel(display_coordinate coordinate, uint16_t value)
 {
-    pixels_.at(coordinate.first).at(coordinate.second) = value;
+    auto tuple = number_to_rgb(value);
+
+    image.setPixel(
+        static_cast<unsigned int>(coordinate.first),
+        static_cast<unsigned int>(coordinate.second),
+        sf::Color(std::get<0>(tuple), std::get<1>(tuple), std::get<2>(tuple))
+    );
 }
 
-std::tuple<int, int, int> interpolateColor(
-    float t, std::tuple<int, int, int> color1, std::tuple<int, int, int> color2
+display_coordinate calculate_end_points(
+    display_coordinate start, display_coordinate current,
+    float target_aspect_ratio = 800.0f / 600.0f
 )
 {
-    int r = std::get<0>(color1) + t * (std::get<0>(color2) - std::get<0>(color1));
-    int g = std::get<1>(color1) + t * (std::get<1>(color2) - std::get<1>(color1));
-    int b = std::get<2>(color1) + t * (std::get<2>(color2) - std::get<2>(color1));
-    return {r, g, b};
+    auto width = static_cast<float>(std::abs(current.first - start.first));
+    auto height = static_cast<float>(std::abs(current.second - start.second));
+
+    // Adjust the dimensions to maintain the target aspect ratio
+    if (width / height > target_aspect_ratio) {
+        // Too wide, adjust width
+        width = height * target_aspect_ratio;
+    }
+    else {
+        // Too tall, adjust height
+        height = width / target_aspect_ratio;
+    }
+
+    auto x = static_cast<float>(std::min(current.first, start.first));
+    auto y = static_cast<float>(std::min(current.second, start.second));
+
+    // Adjust the top-left corner based on new dimensions
+    if (current.first < start.first) {
+        x = static_cast<float>(start.first) - width;
+    }
+    if (current.second < start.second) {
+        y = static_cast<float>(start.second) - height;
+    }
+
+    // Return the top-left and bottom-right corners as a pair of sf::Vector2f
+    return {x + width, y + height};
 }
 
 void BasicDisplay::display_window()
 {
-    sf::RenderWindow window(sf::VideoMode(WINDOW_WIDTH, WINDOW_HEIGHT), "SFML Window");
-
-    window.setFramerateLimit(FRAME_RATE);
-
-    sf::Image image;
-    image.create(WINDOW_WIDTH, WINDOW_HEIGHT);
-    for (std::size_t x_pos = 0; x_pos < WINDOW_WIDTH; ++x_pos) {
-        for (std::size_t y_pos = 0; y_pos < WINDOW_HEIGHT; ++y_pos) {
-            std::uint16_t pixel_value = pixels_.at(x_pos).at(y_pos);
-            auto tuple = number_to_rgb(pixel_value);
-
-            image.setPixel(
-                static_cast<unsigned int>(x_pos), static_cast<unsigned int>(y_pos),
-                sf::Color(std::get<0>(tuple), std::get<1>(tuple), std::get<2>(tuple))
-            );
-        }
-    }
-
-    sf::Texture texture;
     texture.loadFromImage(image);
-
-    sf::Sprite sprite(texture);
-
+    sf::Sprite sprite{texture};
     bool left_mouse_down{};
     float selection_start_x{};
     float selection_start_y{};
@@ -56,7 +63,7 @@ void BasicDisplay::display_window()
     float mouse_y{};
 
     while (window.isOpen()) {
-        sf::Event event;
+        sf::Event event{};
         while (window.pollEvent(event)) {
             switch (event.type) {
                 case sf::Event::Closed:
@@ -75,29 +82,25 @@ void BasicDisplay::display_window()
                     selection_start_x = static_cast<float>(event.mouseButton.x);
                     selection_start_y = static_cast<float>(event.mouseButton.y);
                     break;
+                default:
+                    break;
 
                 case sf::Event::MouseButtonReleased:
                     if (event.mouseButton.button != sf::Mouse::Left) {
                         break;
                     }
+                    auto ends = calculate_end_points(
+                        {selection_start_x, selection_start_y}, {mouse_x, mouse_y}
+                    );
                     on_resize_(
                         sf::Vector2f(
                             std::min(mouse_x, selection_start_x),
                             std::min(mouse_y, selection_start_y)
                         ),
-                        sf::Vector2f(
-                            std::max(mouse_x, selection_start_x),
-                            std::max(mouse_y, selection_start_y)
-                        )
+                        sf::Vector2f(ends.first, ends.second)
                     );
                     left_mouse_down = false;
-                    break;
-
-                default:
-                    break;
-            }
-            if (event.type == sf::Event::Closed) {
-                window.close();
+                    return;
             }
         }
 
@@ -105,15 +108,15 @@ void BasicDisplay::display_window()
 
         window.draw(sprite);
         if (left_mouse_down) {
-            sf::RectangleShape selection_rectangle(sf::Vector2f(
-                std::abs(mouse_x - selection_start_x),
-                std::abs(mouse_y - selection_start_y)
-            ));
-            selection_rectangle.setPosition(
-                std::min(mouse_x, selection_start_x),
-                std::min(mouse_y, selection_start_y)
+            display_coordinate end_point = calculate_end_points(
+                {selection_start_x, selection_start_y}, {mouse_x, mouse_y}
             );
 
+            sf::RectangleShape selection_rectangle(
+                {end_point.first - selection_start_x,
+                 end_point.second - selection_start_y}
+            );
+            selection_rectangle.setPosition(selection_start_x, selection_start_y);
             selection_rectangle.setFillColor(sf::Color(255, 0, 0, 127));
             window.draw(selection_rectangle);
         }
