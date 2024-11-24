@@ -4,6 +4,8 @@
 
 #include <complex>
 
+#include <iterator>
+
 namespace fractal {
 using display_coordinate = std::pair<uint16_t, uint16_t>;
 using complex_coordinate = std::complex<complex_underlying>;
@@ -13,26 +15,58 @@ struct display_domain {
     display_coordinate end_coordinate;
 
     class DisplayCoordinateIterator {
-        display_coordinate current_coordinate_;
-        display_coordinate end_coordinate_;
+        uint32_t grid_width_;
+        uint32_t current_coordinate_;
+        uint32_t end_coordinate_;
+
+        uint32_t decay_coordinate_(const display_coordinate& coordinate) const
+        {
+            return static_cast<uint32_t>(coordinate.first)
+                   + static_cast<uint32_t>(coordinate.second) * grid_width_;
+        }
 
     public:
+        using iterator_category = std::bidirectional_iterator_tag;
+        using value_type = display_coordinate;
+        using difference_type = std::uint32_t;
+        using pointer = display_coordinate*;
+        using reference = display_coordinate&;
+
         explicit DisplayCoordinateIterator(const display_domain& domain) :
-            current_coordinate_{domain.start_coordinate},
-            end_coordinate_{domain.end_coordinate}
+            grid_width_{domain.end_coordinate.first},
+            current_coordinate_{decay_coordinate_(domain.start_coordinate)},
+            end_coordinate_{decay_coordinate_(domain.end_coordinate)}
         {}
 
-        const display_coordinate& operator*() const { return current_coordinate_; }
+        value_type operator*() const
+        {
+            return {
+                current_coordinate_ % grid_width_,
+                (current_coordinate_ - current_coordinate_ % grid_width_) / grid_width_
+            };
+        }
 
         DisplayCoordinateIterator& operator++()
         {
-            if (current_coordinate_.first == end_coordinate_.first) [[unlikely]] {
-                current_coordinate_.first = 0;
-                current_coordinate_.second++;
-            }
-            else {
-                current_coordinate_.first++;
-            }
+            ++current_coordinate_;
+            return *this;
+        }
+
+        DisplayCoordinateIterator& operator--()
+        {
+            --current_coordinate_;
+            return *this;
+        }
+
+        DisplayCoordinateIterator& operator-(difference_type other)
+        {
+            current_coordinate_ -= other;
+            return *this;
+        }
+
+        DisplayCoordinateIterator& operator+(difference_type other)
+        {
+            current_coordinate_ += other;
             return *this;
         }
 

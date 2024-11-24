@@ -9,6 +9,7 @@
 #include <complex>
 
 #include <algorithm>
+#include <execution>
 #include <limits>
 
 namespace fractal {
@@ -78,7 +79,10 @@ void display_mandelbrot()
             );
         };
 
-        std::for_each(DISPLAY_DOMAIN.begin(), DISPLAY_DOMAIN.end(), process_coordinate);
+        std::for_each(
+            std::execution::par_unseq, DISPLAY_DOMAIN.begin(), DISPLAY_DOMAIN.end(),
+            process_coordinate
+        );
 
         display.display_window();
     }
