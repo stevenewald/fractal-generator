@@ -6,6 +6,7 @@
 #include "graphics/aspect_ratio/aspect_ratio.hpp"
 #include "graphics/color_conversions/color_conversions.hpp"
 #include "graphics/display_to_complex.hpp"
+#include "units.hpp"
 
 #include <fmt/base.h>
 #include <fmt/format.h>
@@ -23,14 +24,22 @@
 
 namespace fractal {
 void MandelbrotWindow::draw_coordinate_(
-    const display_coordinate& display_coord, const complex_coordinate& complex_coord
+    display_coordinate display_coord,
+    const std::array<std::complex<complex_underlying>, 8>& complex_coords
 )
 {
-    iteration_count iterations =
-        compute_iterations({0, 0}, complex_coord, MANDELBROT_MAX_ITERATIONS);
+    std::array<std::complex<complex_underlying>, 8> starts = {
+        std::complex<complex_underlying>{0, 0}
+    };
+    auto iterations =
+        compute_iterations(starts, complex_coords, MANDELBROT_MAX_ITERATIONS);
 
-    float iteration_ratio = static_cast<float>(iterations) / MANDELBROT_MAX_ITERATIONS;
-    set_pixel_color(display_coord, iteration_ratio);
+    for (size_t i = 0; i < 8; i++) {
+        float iteration_ratio =
+            static_cast<float>(iterations[i]) / MANDELBROT_MAX_ITERATIONS;
+        set_pixel_color(display_coord, iteration_ratio);
+        display_coord.first++;
+    }
 }
 
 void MandelbrotWindow::on_resize_(display_domain new_domain_selection)
@@ -43,14 +52,21 @@ void MandelbrotWindow::on_resize_(display_domain new_domain_selection)
     domain_ = {new_top, new_bottom};
     to_complex = {DISPLAY_DOMAIN.end_coordinate, domain_};
 
-    auto process_coordinate = [&](const display_coordinate& display_coord) {
-        auto complex_coord = to_complex.to_complex_projection(display_coord);
-        draw_coordinate_(display_coord, complex_coord);
+    auto process_coordinates = [&](display_coordinate start_display_coord) {
+        std::array<std::complex<complex_underlying>, 8> coords{};
+        auto t = start_display_coord;
+        for (size_t i = 0; i < 8; i++) {
+            coords[i] = to_complex.to_complex_projection(start_display_coord);
+            start_display_coord.first++;
+        }
+        draw_coordinate_(t, coords);
     };
 
     auto process_chunk = [&](display_domain::DisplayCoordinateIterator start,
                              display_domain::DisplayCoordinateIterator end) {
-        std::for_each(start, end, process_coordinate);
+        for (auto it = start; it != end; it+=8) {
+            process_coordinates(*it);
+        }
     };
 
     uint32_t total = WINDOW_WIDTH * WINDOW_HEIGHT;

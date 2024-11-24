@@ -22,7 +22,8 @@ class MandelbrotWindow : public DisplayEventObserver {
 
     void on_resize_(display_domain new_domain_selection);
     void draw_coordinate_(
-        const display_coordinate& display_coord, const complex_coordinate& complex_coord
+        display_coordinate display_coord,
+        const std::array<std::complex<complex_underlying>, 8>& complex_coords
     );
 
 public:

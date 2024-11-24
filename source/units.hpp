@@ -13,7 +13,7 @@ using iteration_count = std::uint16_t;
 using complex_underlying = boost::multiprecision::number<small_float>;
 using complex = boost::multiprecision::complex_adaptor<small_float>;*/
 
-using complex_underlying = __float128;
+using complex_underlying = double;
 
 struct color {
     uint8_t red;
