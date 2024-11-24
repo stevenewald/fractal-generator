@@ -7,12 +7,17 @@
 #include "graphics/color_conversions/color_conversions.hpp"
 #include "graphics/display_to_complex.hpp"
 
+#include <fmt/base.h>
+#include <fmt/format.h>
 #include <SFML/Graphics/Drawable.hpp>
 #include <SFML/Graphics/Image.hpp>
 #include <SFML/Graphics/Sprite.hpp>
 #include <SFML/Graphics/Texture.hpp>
 
+#include <chrono>
+
 #include <future>
+#include <iostream>
 #include <memory>
 #include <optional>
 
@@ -54,6 +59,8 @@ void MandelbrotWindow::on_resize_(display_domain new_domain_selection)
 
     std::vector<std::future<void>> futures;
 
+    auto start = std::chrono::high_resolution_clock::now();
+
     for (uint32_t chunk = 0; chunk < chunks; chunk++) {
         display_domain::DisplayCoordinateIterator start =
             DISPLAY_DOMAIN.begin() + chunk * step;
@@ -66,6 +73,9 @@ void MandelbrotWindow::on_resize_(display_domain new_domain_selection)
     for (const auto& future : futures) {
         future.wait();
     }
+    auto end = std::chrono::high_resolution_clock::now();
+    auto time = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+    std::cout << fmt::format("Time elapsed: {}", time.count()) << "\n";
 }
 
 MandelbrotWindow::MandelbrotWindow()
