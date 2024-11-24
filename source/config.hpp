@@ -1,6 +1,7 @@
 #pragma once
 
 #include "coordinates.hpp"
+#include "units.hpp"
 
 #include <cstddef>
 
@@ -19,4 +20,7 @@ constexpr complex_domain START_COMPLEX_DOMAIN{
     {complex_underlying{-2}, complex_underlying{-1.5}},
     {complex_underlying{1},  complex_underlying{1.5} }
 };
+
+const complex_underlying MANDELBROT_DIVERGENCE_NORM = 4;
+const iteration_count MANDELBROT_MAX_ITERATIONS = 256;
 } // namespace fractal

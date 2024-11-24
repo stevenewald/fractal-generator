@@ -62,10 +62,11 @@ color hsv_to_rgb(float hue, float saturation, float value)
 
 color ratio_to_rgb(float ratio)
 {
-    if (ratio < 0 || ratio > 1) {
+    if (ratio < 0 || ratio > 1) [[unlikely]] {
         throw std::out_of_range(fmt::format("Ratio out of range: {}", ratio));
     }
-    float hue = static_cast<float>(ratio) * 360.0f;
+
+    float hue = ratio * 360.0f;
     float saturation = 1.0f;
     float value = 1.0f;
 

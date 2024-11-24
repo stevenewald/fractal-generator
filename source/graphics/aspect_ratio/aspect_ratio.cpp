@@ -1,11 +1,9 @@
-#pragma once
-
-#include "coordinates.hpp"
+#include "aspect_ratio.hpp"
 
 namespace fractal {
-inline display_coordinate calculate_end_points(
-    display_coordinate start, display_coordinate current,
-    float target_aspect_ratio = 800.0f / 600.0f
+
+display_coordinate calculate_rectangle_end_point(
+    display_coordinate start, display_coordinate current, float target_aspect_ratio
 )
 {
     auto width = static_cast<float>(std::abs(current.first - start.first));

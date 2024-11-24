@@ -1,12 +1,18 @@
-#include "basic_display.hpp"
+#include "display.hpp"
 
 #include <fmt/format.h>
 
 #include <cmath>
 
 namespace fractal {
+PixelDisplay::PixelDisplay()
+{
+    window_.clear(sf::Color::Black);
+    window_.setFramerateLimit(FRAME_RATE);
+    window_.display();
+}
 
-void BasicDisplay::handle_event_(const sf::Event& event)
+void PixelDisplay::handle_event_(const sf::Event& event)
 {
     switch (event.type) {
         case sf::Event::MouseMoved:
@@ -31,16 +37,16 @@ void BasicDisplay::handle_event_(const sf::Event& event)
             );
             return;
         default:
-            break;
+            return;
     }
 }
 
-void BasicDisplay::add_observer(std::unique_ptr<DisplayEventObserver> observer)
+void PixelDisplay::add_observer(std::unique_ptr<DisplayEventObserver> observer)
 {
     observers_.push_back(std::move(observer));
 }
 
-void BasicDisplay::poll_window_events()
+void PixelDisplay::poll_window_events()
 {
     sf::Event event{};
     while (window_.pollEvent(event)) {
@@ -48,18 +54,16 @@ void BasicDisplay::poll_window_events()
     }
 }
 
-void BasicDisplay::display_window()
+void PixelDisplay::display_window()
 {
-    window_.clear(sf::Color::Black);
-
     auto draw_from_observer = [this](const auto& observer) {
         if (auto opt = observer->get_drawable(); opt) {
             window_.draw(*(opt.value()));
         }
     };
 
+    window_.clear(sf::Color::Black);
     std::for_each(observers_.begin(), observers_.end(), draw_from_observer);
-
     window_.display();
 }
 } // namespace fractal

@@ -1,6 +1,6 @@
-#include "graphics/basic_display.hpp"
-#include "graphics/selection.hpp"
-#include "mandelbrot.hpp"
+#include "graphics/display/display.hpp"
+#include "graphics/selection_window/selection_window.hpp"
+#include "mandelbrot/mandelbrot_window.hpp"
 
 #include <argparse/argparse.hpp>
 
@@ -8,9 +8,9 @@ namespace fractal {
 
 void display_mandelbrot()
 {
-    BasicDisplay display;
+    PixelDisplay display;
 
-    display.add_observer(std::make_unique<Mandelbrot>());
+    display.add_observer(std::make_unique<MandelbrotWindow>());
     display.add_observer(std::make_unique<SelectionWindow>());
 
     while (true) {
