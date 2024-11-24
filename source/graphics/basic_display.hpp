@@ -14,9 +14,9 @@
 
 namespace fractal {
 class BasicDisplay {
-    sf::RenderWindow window{sf::VideoMode(WINDOW_WIDTH, WINDOW_HEIGHT), "SFML Window"};
-    sf::Image image;
-    sf::Texture texture;
+    sf::RenderWindow window_{sf::VideoMode(WINDOW_WIDTH, WINDOW_HEIGHT), "SFML Window"};
+    sf::Image image_;
+    sf::Texture texture_;
     std::function<void(sf::Vector2f, sf::Vector2f)> on_resize_;
 
 public:
@@ -24,8 +24,8 @@ public:
 
     ) : on_resize_(std::move(on_resize))
     {
-        window.setFramerateLimit(FRAME_RATE);
-        image.create(WINDOW_WIDTH, WINDOW_HEIGHT);
+        window_.setFramerateLimit(FRAME_RATE);
+        image_.create(WINDOW_WIDTH, WINDOW_HEIGHT);
     }
 
     void set_pixel(display_coordinate coordinate, uint16_t value);

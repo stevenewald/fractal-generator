@@ -12,7 +12,7 @@ void BasicDisplay::set_pixel(display_coordinate coordinate, uint16_t value)
 {
     auto tuple = number_to_rgb(value);
 
-    image.setPixel(
+    image_.setPixel(
         static_cast<unsigned int>(coordinate.first),
         static_cast<unsigned int>(coordinate.second),
         sf::Color(std::get<0>(tuple), std::get<1>(tuple), std::get<2>(tuple))
@@ -54,20 +54,20 @@ display_coordinate calculate_end_points(
 
 void BasicDisplay::display_window()
 {
-    texture.loadFromImage(image);
-    sf::Sprite sprite{texture};
+    texture_.loadFromImage(image_);
+    sf::Sprite sprite{texture_};
     bool left_mouse_down{};
     float selection_start_x{};
     float selection_start_y{};
     float mouse_x{};
     float mouse_y{};
 
-    while (window.isOpen()) {
+    while (window_.isOpen()) {
         sf::Event event{};
-        while (window.pollEvent(event)) {
+        while (window_.pollEvent(event)) {
             switch (event.type) {
                 case sf::Event::Closed:
-                    window.close();
+                    window_.close();
                     break;
                 case sf::Event::MouseMoved:
                     mouse_x = static_cast<float>(event.mouseMove.x);
@@ -104,9 +104,9 @@ void BasicDisplay::display_window()
             }
         }
 
-        window.clear(sf::Color::Black);
+        window_.clear(sf::Color::Black);
 
-        window.draw(sprite);
+        window_.draw(sprite);
         if (left_mouse_down) {
             display_coordinate end_point = calculate_end_points(
                 {selection_start_x, selection_start_y}, {mouse_x, mouse_y}
@@ -118,10 +118,10 @@ void BasicDisplay::display_window()
             );
             selection_rectangle.setPosition(selection_start_x, selection_start_y);
             selection_rectangle.setFillColor(sf::Color(255, 0, 0, 127));
-            window.draw(selection_rectangle);
+            window_.draw(selection_rectangle);
         }
 
-        window.display();
+        window_.display();
     }
 }
 } // namespace fractal
