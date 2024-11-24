@@ -64,7 +64,7 @@ void MandelbrotWindow::on_resize_(display_domain new_domain_selection)
 
     auto process_chunk = [&](display_domain::DisplayCoordinateIterator start,
                              display_domain::DisplayCoordinateIterator end) {
-        for (auto it = start; it != end; it+=8) {
+        for (auto it = start; it != end; it += 8) {
             process_coordinates(*it);
         }
     };
