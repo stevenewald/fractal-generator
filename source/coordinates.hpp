@@ -58,16 +58,18 @@ struct display_domain {
             return *this;
         }
 
-        DisplayCoordinateIterator& operator-(difference_type other)
+        DisplayCoordinateIterator operator-(difference_type other)
         {
-            current_coordinate_ -= other;
-            return *this;
+            DisplayCoordinateIterator tmp = *this;
+            tmp.current_coordinate_ -= other;
+            return tmp;
         }
 
-        DisplayCoordinateIterator& operator+(difference_type other)
+        DisplayCoordinateIterator operator+(difference_type other)
         {
-            current_coordinate_ += other;
-            return *this;
+            DisplayCoordinateIterator tmp = *this;
+            tmp.current_coordinate_ += other;
+            return tmp;
         }
 
         bool operator==(const DisplayCoordinateIterator&) const = default;
@@ -81,6 +83,8 @@ struct display_domain {
             display_domain{end_coordinate, end_coordinate}
         };
     }
+
+    std::uint32_t size() const { return end_coordinate.first * end_coordinate.second; }
 };
 
 struct complex_domain {

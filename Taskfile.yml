@@ -39,6 +39,14 @@ tasks:
       - task: build
       - ./{{ .PATH }}
 
+  run-perf:
+    dir: .
+    vars:
+      PATH: '{{if eq .RELEASE_BUILD "true"}}build/{{.NAME}}{{else}}build/dev/{{.NAME}}{{end}}'
+    cmds:
+      - task: build
+      - perf record -g ./{{ .PATH }}
+
   test:
     dir: '{{if eq .RELEASE_BUILD "true"}}./build{{else}}.{{end}}'
     vars:
