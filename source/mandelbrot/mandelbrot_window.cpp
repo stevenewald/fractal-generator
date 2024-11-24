@@ -2,7 +2,7 @@
 
 #include "config.hpp"
 #include "coordinates.hpp"
-#include "equations.hpp"
+#include "equations_simd.hpp"
 #include "graphics/aspect_ratio/aspect_ratio.hpp"
 #include "graphics/color_conversions/color_conversions.hpp"
 #include "graphics/display_to_complex.hpp"
@@ -28,7 +28,7 @@ void MandelbrotWindow::draw_coordinate_(
     const std::array<std::complex<complex_underlying>, 8>& complex_coords
 )
 {
-    std::array<std::complex<complex_underlying>, 8> starts = {
+    static constexpr std::array<std::complex<complex_underlying>, 8> starts = {
         std::complex<complex_underlying>{0, 0}
     };
     auto iterations =
