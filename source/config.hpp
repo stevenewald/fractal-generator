@@ -7,8 +7,8 @@
 
 namespace fractal {
 
-constexpr std::size_t WINDOW_WIDTH = 800UZ;
-constexpr std::size_t WINDOW_HEIGHT = 600UZ;
+constexpr std::size_t WINDOW_WIDTH = 800UZ*2;
+constexpr std::size_t WINDOW_HEIGHT = 600UZ*2;
 constexpr std::size_t FRAME_RATE = 60UZ;
 
 constexpr display_domain DISPLAY_DOMAIN{
@@ -22,5 +22,5 @@ constexpr complex_domain START_COMPLEX_DOMAIN{
 };
 
 const complex_underlying MANDELBROT_DIVERGENCE_NORM = 4;
-const iteration_count MANDELBROT_MAX_ITERATIONS = 256;
+const iteration_count MANDELBROT_MAX_ITERATIONS = 1024;
 } // namespace fractal

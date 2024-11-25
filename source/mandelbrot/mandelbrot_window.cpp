@@ -12,6 +12,7 @@
 #include <SFML/Graphics/Sprite.hpp>
 #include <SFML/Graphics/Texture.hpp>
 
+#include <future>
 #include <memory>
 #include <optional>
 
@@ -42,7 +43,29 @@ void MandelbrotWindow::on_resize_(display_domain new_domain_selection)
         draw_coordinate_(display_coord, complex_coord);
     };
 
-    std::for_each(DISPLAY_DOMAIN.begin(), DISPLAY_DOMAIN.end(), process_coordinate);
+    auto process_chunk = [&](display_domain::DisplayCoordinateIterator start,
+                             display_domain::DisplayCoordinateIterator end) {
+        std::for_each(start, end, process_coordinate);
+    };
+
+    uint32_t total = WINDOW_WIDTH * WINDOW_HEIGHT;
+    uint32_t chunks = 32;
+    uint32_t step = total / chunks;
+
+    std::vector<std::future<void>> futures;
+
+    for (uint32_t chunk = 0; chunk < chunks; chunk++) {
+        display_domain::DisplayCoordinateIterator start =
+            DISPLAY_DOMAIN.begin() + chunk * step;
+        auto end = (chunk + 1) * step <= DISPLAY_DOMAIN.size() ? start + step
+                                                               : DISPLAY_DOMAIN.end();
+
+        futures.push_back(std::async(std::launch::async, process_chunk, start, end));
+    }
+
+    for (const auto& future : futures) {
+        future.wait();
+    }
 }
 
 MandelbrotWindow::MandelbrotWindow()

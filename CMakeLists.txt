@@ -13,6 +13,8 @@ project(
 include(cmake/project-is-top-level.cmake)
 include(cmake/variables.cmake)
 
+set(CMAKE_INTERPROCEDURAL_OPTIMIZATION ON)
+
 # ---- Declare library ----
 
 add_library(
