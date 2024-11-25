@@ -1,7 +1,8 @@
 #pragma once
 
 #include "coordinates.hpp"
-#include "units.hpp"
+#include "units/units.hpp"
+#include "units/units_avx.hpp"
 
 #include <complex>
 
@@ -75,6 +76,20 @@ public:
             imaginary_scaling_factor_ * raw_complex_coord.imag()
         };
         return complex_domain_start_ + offset;
+    }
+
+    avx512_complex to_complex_projections(display_coordinate display_coord)
+    {
+        std::complex<complex_underlying> raw_complex_coord = to_complex(display_coord);
+        avx512_complex complex{};
+        for (uint8_t i = 0; i < 8; i++) {
+            complex.real[i] = complex_domain_start_.real()
+                              + (raw_complex_coord.real() + i) * real_scaling_factor_;
+            complex.imaginary[i] =
+                complex_domain_start_.imag()
+                + raw_complex_coord.imag() * imaginary_scaling_factor_;
+        }
+        return complex;
     }
 };
 } // namespace fractal

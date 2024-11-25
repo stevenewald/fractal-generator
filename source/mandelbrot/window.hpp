@@ -6,7 +6,7 @@
 #include "graphics/color_conversions/color_conversions.hpp"
 #include "graphics/display_event_observer.hpp"
 #include "mandelbrot/mandelbrot_window.hpp"
-#include "units.hpp"
+#include "units/units.hpp"
 
 #include <SFML/Graphics/Image.hpp>
 #include <SFML/Graphics/Texture.hpp>
@@ -23,7 +23,7 @@ class Window : public DisplayEventObserver {
     int selection_start_y_{};
 
 public:
-    void set_pixel_color(display_coordinate coordinate, Ratio iteration_ratio)
+    void set_pixel_color(display_coordinate coordinate, Percentage iteration_ratio)
     {
         color output_color = ratio_to_rgb(iteration_ratio);
 

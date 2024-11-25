@@ -1,7 +1,6 @@
 #pragma once
 
-#include "config.hpp"
-#include "units.hpp"
+#include "units/units_avx.hpp"
 
 namespace fractal {
 

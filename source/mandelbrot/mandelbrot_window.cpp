@@ -4,9 +4,8 @@
 #include "coordinates.hpp"
 #include "equations_simd.hpp"
 #include "graphics/display_to_complex.hpp"
-#include "units.hpp"
+#include "units/units.hpp"
 
-#include <fmt/base.h>
 #include <fmt/format.h>
 #include <immintrin.h>
 #include <SFML/Graphics/Drawable.hpp>
@@ -43,19 +42,8 @@ MandelbrotWindow::arr MandelbrotWindow::calculate_(
 {
     to_complex_.update_display_domain(new_domain_selection);
 
-    auto process_coordinates = [&](display_coordinate start_display_coord) {
-        std::array<std::complex<complex_underlying>, 8> coords{};
-        auto t = start_display_coord;
-        for (size_t i = 0; i < 8; i++) {
-            coords[i] = to_complex_.to_complex_projection(t);
-            t.first++;
-        }
-        avx512_complex coords2{};
-        for (size_t i = 0; i < 8; i++) {
-            coords2.real[i] = coords[i].real();
-            coords2.imaginary[i] = coords[i].imag();
-        }
-        return draw_coordinate_(start_display_coord, coords2);
+    auto process_coordinates = [&](display_coordinate coord) {
+        return draw_coordinate_(coord, to_complex_.to_complex_projections(coord));
     };
 
     arr ret;
@@ -65,7 +53,7 @@ MandelbrotWindow::arr MandelbrotWindow::calculate_(
             auto pos = *it;
             std::array<float, 8> t = process_coordinates(pos);
             for (size_t i = 0; i < 8; i++) {
-                ret[pos.first++][pos.second] = Ratio{t[i]};
+                ret[pos.first++][pos.second] = Percentage{t[i]};
             }
         }
     };

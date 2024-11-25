@@ -2,7 +2,6 @@
 
 #include "config.hpp"
 #include "coordinates.hpp"
-#include "units.hpp"
 
 namespace fractal {
 display_coordinate calculate_rectangle_end_point(

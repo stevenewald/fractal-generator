@@ -1,6 +1,8 @@
 #pragma once
 
-#include "units.hpp"
+#include "units/units.hpp"
+
+#include <complex>
 
 namespace fractal {
 // https://en.wikipedia.org/wiki/Mandelbrot_set#Formal_definition
