@@ -15,6 +15,16 @@ using complex = boost::multiprecision::complex_adaptor<small_float>;*/
 
 using complex_underlying = double;
 
+struct avx512_complex {
+    std::array<complex_underlying, 8> real;
+    std::array<complex_underlying, 8> imaginary;
+
+    std::complex<complex_underlying> get_complex(uint8_t index)
+    {
+        return {real[index], imaginary[index]};
+    }
+};
+
 struct color {
     uint8_t red;
     uint8_t green;

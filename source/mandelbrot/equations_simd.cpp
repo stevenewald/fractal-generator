@@ -1,31 +1,19 @@
+#include "config.hpp"
 #include "equations.hpp"
+#include "units.hpp"
 
 namespace fractal {
 std::array<iteration_count, 8> compute_iterations(
-    const std::array<std::complex<complex_underlying>, 8>& z_0,
-    const std::array<std::complex<complex_underlying>, 8>& constant,
-    iteration_count max_iters
+    const avx512_complex& z_0, const avx512_complex& constant, iteration_count max_iters
 )
 {
     static const auto SQUARED_DIVERGENCE =
         MANDELBROT_DIVERGENCE_NORM * MANDELBROT_DIVERGENCE_NORM;
 
-    alignas(64) std::array<double, 8> reals = {z_0[0].real(), z_0[1].real(),
-                                               z_0[2].real(), z_0[3].real(),
-                                               z_0[4].real(), z_0[5].real(),
-                                               z_0[6].real(), z_0[7].real()};
-    alignas(64) std::array<double, 8> imags = {z_0[0].imag(), z_0[1].imag(),
-                                               z_0[2].imag(), z_0[3].imag(),
-                                               z_0[4].imag(), z_0[5].imag(),
-                                               z_0[6].imag(), z_0[7].imag()};
-    alignas(64) std::array<double, 8> const_reals = {
-        constant[0].real(), constant[1].real(), constant[2].real(), constant[3].real(),
-        constant[4].real(), constant[5].real(), constant[6].real(), constant[7].real()
-    };
-    alignas(64) std::array<double, 8> const_imags = {
-        constant[0].imag(), constant[1].imag(), constant[2].imag(), constant[3].imag(),
-        constant[4].imag(), constant[5].imag(), constant[6].imag(), constant[7].imag()
-    };
+    alignas(64) std::array<double, 8> reals = z_0.real;
+    alignas(64) std::array<double, 8> imags = z_0.imaginary;
+    alignas(64) std::array<double, 8> const_reals = constant.real;
+    alignas(64) std::array<double, 8> const_imags = constant.imaginary;
 
     std::array<iteration_count, 8> solved_its = {0};
 

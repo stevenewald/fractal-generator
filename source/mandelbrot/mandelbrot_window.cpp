@@ -24,15 +24,12 @@
 
 namespace fractal {
 void MandelbrotWindow::draw_coordinate_(
-    display_coordinate display_coord,
-    const std::array<std::complex<complex_underlying>, 8>& complex_coords
+    display_coordinate display_coord, const avx512_complex& complex_coords
 )
 {
-    static constexpr std::array<std::complex<complex_underlying>, 8> starts = {
-        std::complex<complex_underlying>{0, 0}
-    };
+    static constexpr avx512_complex START{};
     auto iterations =
-        compute_iterations(starts, complex_coords, MANDELBROT_MAX_ITERATIONS);
+        compute_iterations(START, complex_coords, MANDELBROT_MAX_ITERATIONS);
 
     for (size_t i = 0; i < 8; i++) {
         float iteration_ratio =
@@ -59,7 +56,12 @@ void MandelbrotWindow::on_resize_(display_domain new_domain_selection)
             coords[i] = to_complex.to_complex_projection(start_display_coord);
             start_display_coord.first++;
         }
-        draw_coordinate_(t, coords);
+        avx512_complex coords2{};
+        for (size_t i = 0; i < 8; i++) {
+            coords2.real[i] = coords[i].real();
+            coords2.imaginary[i] = coords[i].imag();
+        }
+        draw_coordinate_(t, coords2);
     };
 
     auto process_chunk = [&](display_domain::DisplayCoordinateIterator start,

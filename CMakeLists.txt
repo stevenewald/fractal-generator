@@ -26,6 +26,7 @@ add_library(
     source/graphics/color_conversions/color_conversions.cpp
     source/graphics/aspect_ratio/aspect_ratio.cpp
     source/mandelbrot/equations_simd.cpp
+    source/mandelbrot/equations.cpp
 )
 
 target_include_directories(

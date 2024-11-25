@@ -3,6 +3,7 @@
 #include "config.hpp"
 #include "coordinates.hpp"
 #include "graphics/display_event_observer.hpp"
+#include "units.hpp"
 
 #include <SFML/Graphics/Drawable.hpp>
 #include <SFML/Graphics/Image.hpp>
@@ -22,8 +23,7 @@ class MandelbrotWindow : public DisplayEventObserver {
 
     void on_resize_(display_domain new_domain_selection);
     void draw_coordinate_(
-        display_coordinate display_coord,
-        const std::array<std::complex<complex_underlying>, 8>& complex_coords
+        display_coordinate display_coord, const avx512_complex& complex_coords
     );
 
 public:
