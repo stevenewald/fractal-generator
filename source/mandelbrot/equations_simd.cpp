@@ -1,5 +1,4 @@
 #include "config.hpp"
-#include "equations.hpp"
 #include "units.hpp"
 
 #include <immintrin.h>

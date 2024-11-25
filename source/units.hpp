@@ -1,8 +1,13 @@
 #pragma once
 
-#include <boost/multiprecision/cpp_bin_float.hpp>
+/*#include <boost/multiprecision/cpp_bin_float.hpp>
 #include <boost/multiprecision/cpp_complex.hpp>
 #include <boost/multiprecision/number.hpp>
+*/
+#include <complex>
+#include <cstdint>
+
+#include <array>
 
 namespace fractal {
 using iteration_count = std::uint16_t;

@@ -1,8 +1,8 @@
 #pragma once
 
-#include "config.hpp"
 #include "coordinates.hpp"
 #include "graphics/display_event_observer.hpp"
+#include "graphics/display_to_complex.hpp"
 #include "units.hpp"
 
 #include <SFML/Graphics/Drawable.hpp>
@@ -15,7 +15,9 @@
 
 namespace fractal {
 class MandelbrotWindow : public DisplayEventObserver {
-    complex_domain domain_ = START_COMPLEX_DOMAIN;
+    const display_domain DISPLAY_DOMAIN;
+    complex_domain complex_domain_;
+    DisplayToComplexCoordinates to_complex_;
     sf::Image image_;
     sf::Texture texture_;
     int selection_start_x_{};
@@ -27,7 +29,7 @@ class MandelbrotWindow : public DisplayEventObserver {
     );
 
 public:
-    MandelbrotWindow();
+    MandelbrotWindow(display_domain display_domain, complex_domain complex_domain);
 
     void on_mouse_button_pressed(const sf::Event::MouseButtonEvent& event) override;
 

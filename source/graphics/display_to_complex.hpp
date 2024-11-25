@@ -7,6 +7,7 @@
 
 namespace fractal {
 class DisplayToComplexCoordinates {
+    const display_domain DISPLAY_DOMAIN;
     complex_underlying real_scaling_factor_;
     complex_underlying imaginary_scaling_factor_;
     complex_coordinate complex_domain_start_;
@@ -40,14 +41,31 @@ class DisplayToComplexCoordinates {
 
 public:
     DisplayToComplexCoordinates(
-        display_coordinate display_top_right, const complex_domain& complex_domain
+        display_domain display_domain, const complex_domain& complex_domain
     ) :
-        real_scaling_factor_(real_scaling_factor(display_top_right, complex_domain)),
+        DISPLAY_DOMAIN{std::move(display_domain)},
+        real_scaling_factor_(
+            real_scaling_factor(display_domain.end_coordinate, complex_domain)
+        ),
         imaginary_scaling_factor_(
-            imaginary_scaling_factor(display_top_right, complex_domain)
+            imaginary_scaling_factor(display_domain.end_coordinate, complex_domain)
         ),
         complex_domain_start_(complex_domain.start_coordinate)
     {}
+
+    void update_display_domain(display_domain new_domain)
+    {
+        complex_coordinate new_start =
+            to_complex_projection(new_domain.start_coordinate);
+        complex_coordinate new_end = to_complex_projection(new_domain.end_coordinate);
+        complex_domain new_complex_domain = {new_start, new_end};
+
+        real_scaling_factor_ =
+            real_scaling_factor(DISPLAY_DOMAIN.end_coordinate, new_complex_domain);
+        imaginary_scaling_factor_ =
+            imaginary_scaling_factor(DISPLAY_DOMAIN.end_coordinate, new_complex_domain);
+        complex_domain_start_ = new_complex_domain.start_coordinate;
+    }
 
     complex_coordinate to_complex_projection(display_coordinate display_coord)
     {

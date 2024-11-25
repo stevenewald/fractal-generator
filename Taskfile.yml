@@ -2,7 +2,7 @@ version: '3'
 
 vars:
   NAME: fractal-generator
-  RELEASE_BUILD: "false"
+  RELEASE_BUILD: "true"
   RELEASE_PRESET: "ci-ubuntu"
 
 tasks:
@@ -14,12 +14,11 @@ tasks:
 
   init:
     dir: .
-    vars:
-      PRESET: '{{if eq .RELEASE_BUILD "true"}}{{.RELEASE_PRESET}}{{else}}dev{{end}}'
     preconditions:
       - test -f CMakeUserPresets.json
     cmds:
-      - cmake --preset={{.PRESET}}
+      - cmake --preset=dev
+      - cmake --preset={{.RELEASE_PRESET}}
 
 
   build:
@@ -56,6 +55,12 @@ tasks:
     cmds:
       - task: build
       - ctest {{.TEST_FLAGS}}
+
+  bench:
+    dir: .
+    cmds:
+      - task: build
+      - ./build/benchmark/fractal_benchmarks
 
   fmt:
     dir: .

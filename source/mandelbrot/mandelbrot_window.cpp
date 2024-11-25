@@ -19,6 +19,7 @@
 #include <chrono>
 
 #include <future>
+#include <iostream>
 #include <memory>
 #include <optional>
 
@@ -54,19 +55,13 @@ void MandelbrotWindow::draw_coordinate_(
 
 void MandelbrotWindow::on_resize_(display_domain new_domain_selection)
 {
-    DisplayToComplexCoordinates to_complex{DISPLAY_DOMAIN.end_coordinate, domain_};
-    complex_coordinate new_top =
-        to_complex.to_complex_projection(new_domain_selection.start_coordinate);
-    complex_coordinate new_bottom =
-        to_complex.to_complex_projection(new_domain_selection.end_coordinate);
-    domain_ = {new_top, new_bottom};
-    to_complex = {DISPLAY_DOMAIN.end_coordinate, domain_};
+    to_complex_.update_display_domain(new_domain_selection);
 
     auto process_coordinates = [&](display_coordinate start_display_coord) {
         std::array<std::complex<complex_underlying>, 8> coords{};
         auto t = start_display_coord;
         for (size_t i = 0; i < 8; i++) {
-            coords[i] = to_complex.to_complex_projection(start_display_coord);
+            coords[i] = to_complex_.to_complex_projection(start_display_coord);
             start_display_coord.first++;
         }
         avx512_complex coords2{};
@@ -84,7 +79,8 @@ void MandelbrotWindow::on_resize_(display_domain new_domain_selection)
         }
     };
 
-    uint32_t total = WINDOW_WIDTH * WINDOW_HEIGHT;
+    uint32_t total = (DISPLAY_DOMAIN.end_coordinate.first + 1u)
+                     * (DISPLAY_DOMAIN.end_coordinate.second + 1u);
     uint32_t chunks = 128;
     uint32_t step = total / chunks;
 
@@ -93,12 +89,12 @@ void MandelbrotWindow::on_resize_(display_domain new_domain_selection)
     auto start = std::chrono::high_resolution_clock::now();
 
     for (uint32_t chunk = 0; chunk < chunks; chunk++) {
-        display_domain::DisplayCoordinateIterator start =
+        display_domain::DisplayCoordinateIterator it_start =
             DISPLAY_DOMAIN.begin() + chunk * step;
-        auto end = (chunk + 1) * step <= DISPLAY_DOMAIN.size() ? start + step
+        auto end = (chunk + 1) * step <= DISPLAY_DOMAIN.size() ? it_start + step
                                                                : DISPLAY_DOMAIN.end();
 
-        futures.push_back(std::async(std::launch::async, process_chunk, start, end));
+        futures.push_back(std::async(std::launch::async, process_chunk, it_start, end));
     }
 
     for (const auto& future : futures) {
@@ -109,10 +105,14 @@ void MandelbrotWindow::on_resize_(display_domain new_domain_selection)
     std::cout << fmt::format("Time elapsed: {}", time.count()) << "\n";
 }
 
-MandelbrotWindow::MandelbrotWindow()
+MandelbrotWindow::MandelbrotWindow(
+    display_domain display_domain, complex_domain complex_domain
+) : DISPLAY_DOMAIN{display_domain}, to_complex_{display_domain, complex_domain}
 {
-    image_.create(WINDOW_WIDTH, WINDOW_HEIGHT);
-    on_resize_(DISPLAY_DOMAIN);
+    image_.create(
+        display_domain.end_coordinate.first, display_domain.end_coordinate.second
+    );
+    on_resize_(display_domain);
 }
 
 void MandelbrotWindow::on_mouse_button_pressed(const sf::Event::MouseButtonEvent& event)
