@@ -12,7 +12,7 @@
 
 namespace fractal {
 class MandelbrotWindow {
-    using arr = std::array<std::array<float, WINDOW_HEIGHT>, WINDOW_WIDTH + 8>;
+    using arr = std::array<std::array<Ratio, WINDOW_HEIGHT>, WINDOW_WIDTH + 8>;
     DisplayToComplexCoordinates to_complex_;
 
     static std::array<float, 8> draw_coordinate_(

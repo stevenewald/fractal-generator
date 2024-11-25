@@ -34,4 +34,4 @@ else()
     message(WARNING "LTO is not supported: ${error}")
 endif()
 
-target_compile_features(fractal_benchmarks PRIVATE cxx_std_20)
+target_compile_features(fractal_benchmarks PRIVATE cxx_std_23)

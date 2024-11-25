@@ -17,12 +17,19 @@ struct display_domain {
     class DisplayCoordinateIterator {
         uint32_t grid_width_;
         uint32_t current_coordinate_;
-        uint32_t end_coordinate_;
 
         uint32_t decay_coordinate_(const display_coordinate& coordinate) const
         {
             return static_cast<uint32_t>(coordinate.first)
                    + static_cast<uint32_t>(coordinate.second) * grid_width_;
+        }
+
+        display_coordinate generate_coordinate_(uint32_t coordinate) const
+        {
+            return {
+                coordinate % grid_width_,
+                (coordinate - coordinate % grid_width_) / grid_width_
+            };
         }
 
     public:
@@ -34,16 +41,12 @@ struct display_domain {
 
         explicit DisplayCoordinateIterator(const display_domain& domain) :
             grid_width_{domain.end_coordinate.first},
-            current_coordinate_{decay_coordinate_(domain.start_coordinate)},
-            end_coordinate_{decay_coordinate_(domain.end_coordinate)}
+            current_coordinate_{decay_coordinate_(domain.start_coordinate)}
         {}
 
         value_type operator*() const
         {
-            return {
-                current_coordinate_ % grid_width_,
-                (current_coordinate_ - current_coordinate_ % grid_width_) / grid_width_
-            };
+            return generate_coordinate_(current_coordinate_);
         }
 
         DisplayCoordinateIterator& operator++()

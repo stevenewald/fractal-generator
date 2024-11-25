@@ -4,6 +4,8 @@
 #include <boost/multiprecision/cpp_complex.hpp>
 #include <boost/multiprecision/number.hpp>
 */
+#include "util.hpp"
+
 #include <complex>
 #include <cstdint>
 
@@ -34,5 +36,33 @@ struct color {
     uint8_t red;
     uint8_t green;
     uint8_t blue;
+};
+
+class Ratio {
+    float ratio_;
+
+public:
+    constexpr explicit Ratio(float ratio) : ratio_{ratio}
+    {
+        assert_true(ratio_ >= 0.0f);
+        assert_true(ratio_ <= 1.0f);
+    }
+
+    consteval explicit Ratio() : ratio_{0.0f} {}
+
+    float get_ratio() const { return ratio_; }
+};
+
+class Hue {
+    float hue_;
+
+public:
+    constexpr explicit Hue(float hue) : hue_{hue}
+    {
+        assert_true(hue >= 0.0f);
+        assert_true(hue <= 360.0f);
+    }
+
+    float get_hue() const { return hue_; }
 };
 } // namespace fractal

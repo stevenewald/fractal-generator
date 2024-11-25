@@ -19,18 +19,18 @@ display_coordinate calculate_rectangle_end_point(
         height = width / target_aspect_ratio;
     }
 
-    auto x = static_cast<float>(std::min(current.first, start.first));
-    auto y = static_cast<float>(std::min(current.second, start.second));
+    auto new_x = static_cast<float>(std::min(current.first, start.first));
+    auto new_y = static_cast<float>(std::min(current.second, start.second));
 
     // Adjust the top-left corner based on new dimensions
     if (current.first < start.first) {
-        x = static_cast<float>(start.first) - width;
+        new_x = static_cast<float>(start.first) - width;
     }
     if (current.second < start.second) {
-        y = static_cast<float>(start.second) - height;
+        new_y = static_cast<float>(start.second) - height;
     }
 
     // Return the top-left and bottom-right corners as a pair of sf::Vector2f
-    return {x + width, y + height};
+    return {new_x + width, new_y + height};
 }
 } // namespace fractal

@@ -7,10 +7,10 @@
 #include <stdexcept>
 
 namespace fractal {
-color hsv_to_rgb(float hue, float saturation, float value)
+color hsv_to_rgb(Hue hue, Ratio saturation, Ratio value)
 {
-    float chroma = value * saturation;
-    float hue_prime = hue / 60.0f;
+    float chroma = value.get_ratio() * saturation.get_ratio();
+    float hue_prime = hue.get_hue() / 60.0f;
     float uint16_termediate =
         chroma * (1 - static_cast<float>(std::fabs(std::fmod(hue_prime, 2) - 1)));
     float red_temp = 0.0f;
@@ -42,7 +42,7 @@ color hsv_to_rgb(float hue, float saturation, float value)
         blue_temp = uint16_termediate;
     }
 
-    float match_value = value - chroma;
+    float match_value = value.get_ratio() - chroma;
     float red = red_temp + match_value;
     float green = green_temp + match_value;
     float blue = blue_temp + match_value;
@@ -54,15 +54,11 @@ color hsv_to_rgb(float hue, float saturation, float value)
     return {red_int, green_int, blue_int};
 }
 
-color ratio_to_rgb(float ratio)
+color ratio_to_rgb(Ratio ratio)
 {
-    if (ratio < 0 || ratio > 1) [[unlikely]] {
-        throw std::out_of_range(fmt::format("Ratio out of range: {}", ratio));
-    }
-
-    float hue = ratio * 360.0f;
-    float saturation = 1.0f;
-    float value = 1.0f;
+    Hue hue{ratio.get_ratio() * 360.0f};
+    Ratio saturation{1.0f};
+    Ratio value{1.0f};
 
     return hsv_to_rgb(hue, saturation, value);
 }

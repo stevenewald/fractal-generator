@@ -6,6 +6,7 @@
 #include "graphics/color_conversions/color_conversions.hpp"
 #include "graphics/display_event_observer.hpp"
 #include "mandelbrot/mandelbrot_window.hpp"
+#include "units.hpp"
 
 #include <SFML/Graphics/Image.hpp>
 #include <SFML/Graphics/Texture.hpp>
@@ -22,7 +23,7 @@ class Window : public DisplayEventObserver {
     int selection_start_y_{};
 
 public:
-    void set_pixel_color(display_coordinate coordinate, float iteration_ratio)
+    void set_pixel_color(display_coordinate coordinate, Ratio iteration_ratio)
     {
         color output_color = ratio_to_rgb(iteration_ratio);
 
@@ -40,11 +41,10 @@ public:
             display_domain.end_coordinate.first + 1u,
             display_domain.end_coordinate.second + 1u
         );
+
         auto res = mandelbrot_.calculate_(display_domain, display_domain);
-        for (size_t x = 0; x < WINDOW_WIDTH; x++) {
-            for (size_t y = 0; y < WINDOW_HEIGHT; y++) {
-                set_pixel_color({x, y}, res[x][y]);
-            }
+        for (display_coordinate pos : DISPLAY_DOMAIN) {
+            set_pixel_color(pos, res[pos.first][pos.second]);
         }
     }
 
@@ -60,13 +60,16 @@ public:
         auto ends = calculate_rectangle_end_point(
             {selection_start_x_, selection_start_y_}, {event.x, event.y}
         );
-        mandelbrot_.calculate_(
+        auto res = mandelbrot_.calculate_(
             DISPLAY_DOMAIN,
             {
                 {selection_start_x_, selection_start_y_},
                 ends
         }
         );
+        for (display_coordinate pos : DISPLAY_DOMAIN) {
+            set_pixel_color(pos, res[pos.first][pos.second]);
+        }
     }
 
     std::optional<std::unique_ptr<sf::Drawable>> get_drawable() override

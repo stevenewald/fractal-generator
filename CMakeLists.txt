@@ -37,7 +37,7 @@ target_include_directories(
     "\$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/source>"
 )
 
-target_compile_features(fractal-generator_lib PUBLIC cxx_std_20)
+target_compile_features(fractal-generator_lib PUBLIC cxx_std_23)
 
 find_package(fmt REQUIRED)
 find_package(argparse REQUIRED)
@@ -55,8 +55,9 @@ add_executable(fractal-generator::exe ALIAS fractal-generator_exe)
 
 set_property(TARGET fractal-generator_exe PROPERTY OUTPUT_NAME fractal-generator)
 
-target_compile_features(fractal-generator_exe PRIVATE cxx_std_20)
+target_compile_features(fractal-generator_exe PRIVATE cxx_std_23)
 
+target_link_libraries(fractal-generator_exe PRIVATE fmt::fmt)
 target_link_libraries(fractal-generator_exe PRIVATE fractal-generator_lib)
 target_link_libraries(fractal-generator_exe PRIVATE argparse::argparse)
 target_link_libraries(fractal-generator_exe PRIVATE sfml-graphics)

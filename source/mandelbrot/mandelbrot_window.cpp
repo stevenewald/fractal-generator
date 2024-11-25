@@ -58,24 +58,24 @@ MandelbrotWindow::arr MandelbrotWindow::calculate_(
         return draw_coordinate_(start_display_coord, coords2);
     };
 
-    arr ret{};
+    arr ret;
     auto process_chunk = [&](display_domain::DisplayCoordinateIterator start,
                              display_domain::DisplayCoordinateIterator end) {
         for (auto it = start; it != end; it += 8) {
             auto pos = *it;
-            auto t = process_coordinates(pos);
-            for (int i = 0; i < 8; i++) {
-                ret[pos.first++][pos.second] = t[i];
+            std::array<float, 8> t = process_coordinates(pos);
+            for (size_t i = 0; i < 8; i++) {
+                ret[pos.first++][pos.second] = Ratio{t[i]};
             }
         }
     };
 
     constexpr uint32_t total = WINDOW_WIDTH * WINDOW_HEIGHT;
 
-    constexpr uint32_t chunks = 100;
+    constexpr uint32_t chunks = 200;
     constexpr uint32_t step = total / chunks;
 
-    static_assert(step % WINDOW_WIDTH == 0);
+    static_assert(step % WINDOW_WIDTH == 0 && step % 8 == 0);
 
     std::vector<std::future<void>> futures;
 
