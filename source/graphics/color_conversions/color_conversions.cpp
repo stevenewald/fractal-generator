@@ -17,34 +17,28 @@ color hsv_to_rgb(float hue, float saturation, float value)
     float green_temp = 0.0f;
     float blue_temp = 0.0f;
 
-    if (0 <= hue_prime && hue_prime < 1) {
+    if (hue_prime < 1) {
         red_temp = chroma;
         green_temp = uint16_termediate;
-        blue_temp = 0;
     }
-    else if (1 <= hue_prime && hue_prime < 2) {
+    else if (hue_prime < 2) {
         red_temp = uint16_termediate;
         green_temp = chroma;
-        blue_temp = 0;
     }
-    else if (2 <= hue_prime && hue_prime < 3) {
-        red_temp = 0;
+    else if (hue_prime < 3) {
         green_temp = chroma;
         blue_temp = uint16_termediate;
     }
-    else if (3 <= hue_prime && hue_prime < 4) {
-        red_temp = 0;
+    else if (hue_prime < 4) {
         green_temp = uint16_termediate;
         blue_temp = chroma;
     }
-    else if (4 <= hue_prime && hue_prime < 5) {
+    else if (hue_prime < 5) {
         red_temp = uint16_termediate;
-        green_temp = 0;
         blue_temp = chroma;
     }
-    else if (5 <= hue_prime && hue_prime < 6) {
+    else if (hue_prime < 6) {
         red_temp = chroma;
-        green_temp = 0;
         blue_temp = uint16_termediate;
     }
 

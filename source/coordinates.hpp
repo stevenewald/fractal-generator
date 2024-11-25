@@ -58,6 +58,12 @@ struct display_domain {
             return *this;
         }
 
+        DisplayCoordinateIterator& operator+=(difference_type other)
+        {
+            current_coordinate_ += other;
+            return *this;
+        }
+
         DisplayCoordinateIterator operator-(difference_type other)
         {
             DisplayCoordinateIterator tmp = *this;
