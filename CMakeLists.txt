@@ -17,8 +17,11 @@ include(cmake/variables.cmake)
 
 add_library(
     fractal-generator_lib OBJECT
-    source/graphics/basic_display.cpp
-    source/graphics/color_conversions.cpp
+    source/graphics/display/display.cpp
+    source/graphics/selection_window/selection_window.cpp
+    source/mandelbrot/mandelbrot_window.cpp
+    source/graphics/color_conversions/color_conversions.cpp
+    source/graphics/aspect_ratio/aspect_ratio.cpp
 )
 
 target_include_directories(
