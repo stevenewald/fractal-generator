@@ -21,50 +21,52 @@
 #include <iostream>
 
 namespace fractal {
-void MandelbrotWindow::draw_coordinate_(
-    display_coordinate display_coord, const avx512_complex& complex_coords, arr& ref
+std::array<float, 8> MandelbrotWindow::draw_coordinate_(
+    display_coordinate display_coord, const avx512_complex& complex_coords
 )
 {
     static constexpr avx512_complex START{};
     std::array<iteration_count, 8> iterations =
         compute_iterations(START, complex_coords, MANDELBROT_MAX_ITERATIONS);
 
+    std::array<float, 8> ret{};
     for (size_t i = 0; i < 8; i++) {
-        assert(display_coord.first < ref.size());
-        assert(display_coord.second < ref[0].size());
-        ref[display_coord.first][display_coord.second] =
-            static_cast<float>(iterations[i]) / MANDELBROT_MAX_ITERATIONS;
+        ret[i] = static_cast<float>(iterations[i]) / MANDELBROT_MAX_ITERATIONS;
         display_coord.first++;
     }
+    return ret;
 }
 
 MandelbrotWindow::arr MandelbrotWindow::calculate_(
     display_domain full_display_domain, display_domain new_domain_selection
 )
 {
-    arr ret{};
-
     to_complex_.update_display_domain(new_domain_selection);
 
-    auto process_coordinates = [&](display_coordinate start_display_coord, arr& ref) {
+    auto process_coordinates = [&](display_coordinate start_display_coord) {
         std::array<std::complex<complex_underlying>, 8> coords{};
         auto t = start_display_coord;
         for (size_t i = 0; i < 8; i++) {
-            coords[i] = to_complex_.to_complex_projection(start_display_coord);
-            start_display_coord.first++;
+            coords[i] = to_complex_.to_complex_projection(t);
+            t.first++;
         }
         avx512_complex coords2{};
         for (size_t i = 0; i < 8; i++) {
             coords2.real[i] = coords[i].real();
             coords2.imaginary[i] = coords[i].imag();
         }
-        draw_coordinate_(t, coords2, ref);
+        return draw_coordinate_(start_display_coord, coords2);
     };
 
+    arr ret{};
     auto process_chunk = [&](display_domain::DisplayCoordinateIterator start,
                              display_domain::DisplayCoordinateIterator end) {
         for (auto it = start; it != end; it += 8) {
-            process_coordinates(*it, ret);
+            auto pos = *it;
+            auto t = process_coordinates(pos);
+            for (int i = 0; i < 8; i++) {
+                ret[pos.first++][pos.second] = t[i];
+            }
         }
     };
 

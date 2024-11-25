@@ -37,14 +37,15 @@ public:
         mandelbrot_{display_domain, complex_domain}
     {
         image_.create(
-            display_domain.end_coordinate.first, display_domain.end_coordinate.second
+            display_domain.end_coordinate.first + 1u,
+            display_domain.end_coordinate.second + 1u
         );
         auto res = mandelbrot_.calculate_(display_domain, display_domain);
-		for(size_t x = 0; x < WINDOW_WIDTH; x++) {
-			for(size_t y = 0; y < WINDOW_HEIGHT; y++) {
-				set_pixel_color({x,y},res[x][y]);
-			}
-		}
+        for (size_t x = 0; x < WINDOW_WIDTH; x++) {
+            for (size_t y = 0; y < WINDOW_HEIGHT; y++) {
+                set_pixel_color({x, y}, res[x][y]);
+            }
+        }
     }
 
     void on_mouse_button_pressed(const sf::Event::MouseButtonEvent& event) override

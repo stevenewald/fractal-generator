@@ -15,11 +15,9 @@ class MandelbrotWindow {
     using arr = std::array<std::array<float, WINDOW_HEIGHT>, WINDOW_WIDTH + 8>;
     DisplayToComplexCoordinates to_complex_;
 
-    void draw_coordinate_(
-        display_coordinate display_coord, const avx512_complex& complex_coords, arr& ref
+    static std::array<float, 8> draw_coordinate_(
+        display_coordinate display_coord, const avx512_complex& complex_coords
     );
-
-    void set_pixel_color(display_coordinate coordinate, float iteration_ratio);
 
 public:
     MandelbrotWindow(display_domain display_domain, complex_domain complex_domain);
