@@ -10,6 +10,7 @@
 
 #include <fmt/base.h>
 #include <fmt/format.h>
+#include <immintrin.h>
 #include <SFML/Graphics/Drawable.hpp>
 #include <SFML/Graphics/Image.hpp>
 #include <SFML/Graphics/Sprite.hpp>
@@ -18,7 +19,6 @@
 #include <chrono>
 
 #include <future>
-#include <iostream>
 #include <memory>
 #include <optional>
 
@@ -28,13 +28,26 @@ void MandelbrotWindow::draw_coordinate_(
 )
 {
     static constexpr avx512_complex START{};
-    auto iterations =
+    alignas(64) std::array<iteration_count, 8> iterations =
         compute_iterations(START, complex_coords, MANDELBROT_MAX_ITERATIONS);
+    alignas(64) std::array<float, 8> ratios{};
+
+    __m128i iterations_vec = _mm_loadu_epi16(iterations.data());
+
+    __m128i input_low = _mm_unpacklo_epi16(iterations_vec, _mm_setzero_si128());
+    __m128i input_high = _mm_unpackhi_epi16(iterations_vec, _mm_setzero_si128());
+
+    __m128 floats_low = _mm_cvtepi32_ps(input_low);
+    __m128 floats_high = _mm_cvtepi32_ps(input_high);
+
+    floats_low = _mm_div_ps(floats_low, _mm_set1_ps(MANDELBROT_MAX_ITERATIONS));
+    floats_high = _mm_div_ps(floats_high, _mm_set1_ps(MANDELBROT_MAX_ITERATIONS));
+
+    _mm_storeu_ps(ratios.begin(), floats_low);
+    _mm_storeu_ps(ratios.begin() + 4, floats_high);
 
     for (size_t i = 0; i < 8; i++) {
-        float iteration_ratio =
-            static_cast<float>(iterations[i]) / MANDELBROT_MAX_ITERATIONS;
-        set_pixel_color(display_coord, iteration_ratio);
+        set_pixel_color(display_coord, ratios[i]);
         display_coord.first++;
     }
 }
@@ -72,7 +85,7 @@ void MandelbrotWindow::on_resize_(display_domain new_domain_selection)
     };
 
     uint32_t total = WINDOW_WIDTH * WINDOW_HEIGHT;
-    uint32_t chunks = 32;
+    uint32_t chunks = 128;
     uint32_t step = total / chunks;
 
     std::vector<std::future<void>> futures;

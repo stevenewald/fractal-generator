@@ -3,8 +3,6 @@
 #include "config.hpp"
 #include "units.hpp"
 
-#include <immintrin.h>
-
 namespace fractal {
 
 std::array<iteration_count, 8> compute_iterations(
