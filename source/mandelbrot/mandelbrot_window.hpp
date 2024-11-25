@@ -1,7 +1,7 @@
 #pragma once
 
+#include "config.hpp"
 #include "coordinates.hpp"
-#include "graphics/display_event_observer.hpp"
 #include "graphics/display_to_complex.hpp"
 #include "units.hpp"
 
@@ -10,33 +10,21 @@
 #include <SFML/Graphics/Sprite.hpp>
 #include <SFML/Graphics/Texture.hpp>
 
-#include <memory>
-#include <optional>
-
 namespace fractal {
-class MandelbrotWindow : public DisplayEventObserver {
-    const display_domain DISPLAY_DOMAIN;
-    complex_domain complex_domain_;
+class MandelbrotWindow {
+    using arr = std::array<std::array<float, WINDOW_HEIGHT>, WINDOW_WIDTH + 8>;
     DisplayToComplexCoordinates to_complex_;
-    sf::Image image_;
-    sf::Texture texture_;
-    int selection_start_x_{};
-    int selection_start_y_{};
 
-    void on_resize_(display_domain new_domain_selection);
     void draw_coordinate_(
-        display_coordinate display_coord, const avx512_complex& complex_coords
+        display_coordinate display_coord, const avx512_complex& complex_coords, arr& ref
     );
+
+    void set_pixel_color(display_coordinate coordinate, float iteration_ratio);
 
 public:
     MandelbrotWindow(display_domain display_domain, complex_domain complex_domain);
 
-    void on_mouse_button_pressed(const sf::Event::MouseButtonEvent& event) override;
-
-    void on_mouse_button_released(const sf::Event::MouseButtonEvent& event) override;
-
-    void set_pixel_color(display_coordinate coordinate, float iteration_ratio);
-
-    std::optional<std::unique_ptr<sf::Drawable>> get_drawable() override;
+    arr
+    calculate_(display_domain full_display_domain, display_domain new_domain_selection);
 };
 } // namespace fractal

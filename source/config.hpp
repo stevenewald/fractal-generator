@@ -17,5 +17,5 @@ constexpr complex_domain START_COMPLEX_DOMAIN{
 };
 
 const complex_underlying MANDELBROT_DIVERGENCE_NORM = 4;
-const iteration_count MANDELBROT_MAX_ITERATIONS = 2048;
+const iteration_count MANDELBROT_MAX_ITERATIONS = 1024;
 } // namespace fractal

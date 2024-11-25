@@ -3,8 +3,6 @@
 #include "config.hpp"
 #include "coordinates.hpp"
 #include "equations_simd.hpp"
-#include "graphics/aspect_ratio/aspect_ratio.hpp"
-#include "graphics/color_conversions/color_conversions.hpp"
 #include "graphics/display_to_complex.hpp"
 #include "units.hpp"
 
@@ -16,48 +14,39 @@
 #include <SFML/Graphics/Sprite.hpp>
 #include <SFML/Graphics/Texture.hpp>
 
+#include <cassert>
 #include <chrono>
 
 #include <future>
 #include <iostream>
-#include <memory>
-#include <optional>
 
 namespace fractal {
 void MandelbrotWindow::draw_coordinate_(
-    display_coordinate display_coord, const avx512_complex& complex_coords
+    display_coordinate display_coord, const avx512_complex& complex_coords, arr& ref
 )
 {
     static constexpr avx512_complex START{};
-    alignas(64) std::array<iteration_count, 8> iterations =
+    std::array<iteration_count, 8> iterations =
         compute_iterations(START, complex_coords, MANDELBROT_MAX_ITERATIONS);
-    alignas(64) std::array<float, 8> ratios{};
-
-    __m128i iterations_vec = _mm_loadu_epi16(iterations.data());
-
-    __m128i input_low = _mm_unpacklo_epi16(iterations_vec, _mm_setzero_si128());
-    __m128i input_high = _mm_unpackhi_epi16(iterations_vec, _mm_setzero_si128());
-
-    __m128 floats_low = _mm_cvtepi32_ps(input_low);
-    __m128 floats_high = _mm_cvtepi32_ps(input_high);
-
-    floats_low = _mm_div_ps(floats_low, _mm_set1_ps(MANDELBROT_MAX_ITERATIONS));
-    floats_high = _mm_div_ps(floats_high, _mm_set1_ps(MANDELBROT_MAX_ITERATIONS));
-
-    _mm_storeu_ps(ratios.begin(), floats_low);
-    _mm_storeu_ps(ratios.begin() + 4, floats_high);
 
     for (size_t i = 0; i < 8; i++) {
-        set_pixel_color(display_coord, ratios[i]);
+        assert(display_coord.first < ref.size());
+        assert(display_coord.second < ref[0].size());
+        ref[display_coord.first][display_coord.second] =
+            static_cast<float>(iterations[i]) / MANDELBROT_MAX_ITERATIONS;
         display_coord.first++;
     }
 }
 
-void MandelbrotWindow::on_resize_(display_domain new_domain_selection)
+MandelbrotWindow::arr MandelbrotWindow::calculate_(
+    display_domain full_display_domain, display_domain new_domain_selection
+)
 {
+    arr ret{};
+
     to_complex_.update_display_domain(new_domain_selection);
 
-    auto process_coordinates = [&](display_coordinate start_display_coord) {
+    auto process_coordinates = [&](display_coordinate start_display_coord, arr& ref) {
         std::array<std::complex<complex_underlying>, 8> coords{};
         auto t = start_display_coord;
         for (size_t i = 0; i < 8; i++) {
@@ -69,20 +58,22 @@ void MandelbrotWindow::on_resize_(display_domain new_domain_selection)
             coords2.real[i] = coords[i].real();
             coords2.imaginary[i] = coords[i].imag();
         }
-        draw_coordinate_(t, coords2);
+        draw_coordinate_(t, coords2, ref);
     };
 
     auto process_chunk = [&](display_domain::DisplayCoordinateIterator start,
                              display_domain::DisplayCoordinateIterator end) {
         for (auto it = start; it != end; it += 8) {
-            process_coordinates(*it);
+            process_coordinates(*it, ret);
         }
     };
 
-    uint32_t total = (DISPLAY_DOMAIN.end_coordinate.first + 1u)
-                     * (DISPLAY_DOMAIN.end_coordinate.second + 1u);
-    uint32_t chunks = 128;
-    uint32_t step = total / chunks;
+    constexpr uint32_t total = WINDOW_WIDTH * WINDOW_HEIGHT;
+
+    constexpr uint32_t chunks = 100;
+    constexpr uint32_t step = total / chunks;
+
+    static_assert(step % WINDOW_WIDTH == 0);
 
     std::vector<std::future<void>> futures;
 
@@ -90,9 +81,10 @@ void MandelbrotWindow::on_resize_(display_domain new_domain_selection)
 
     for (uint32_t chunk = 0; chunk < chunks; chunk++) {
         display_domain::DisplayCoordinateIterator it_start =
-            DISPLAY_DOMAIN.begin() + chunk * step;
-        auto end = (chunk + 1) * step <= DISPLAY_DOMAIN.size() ? it_start + step
-                                                               : DISPLAY_DOMAIN.end();
+            full_display_domain.begin() + chunk * step;
+        auto end = (chunk + 1) * step <= full_display_domain.size()
+                       ? it_start + step
+                       : full_display_domain.end();
 
         futures.push_back(std::async(std::launch::async, process_chunk, it_start, end));
     }
@@ -103,51 +95,12 @@ void MandelbrotWindow::on_resize_(display_domain new_domain_selection)
     auto end = std::chrono::high_resolution_clock::now();
     auto time = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
     std::cout << fmt::format("Time elapsed: {}", time.count()) << "\n";
+    return ret;
 }
 
 MandelbrotWindow::MandelbrotWindow(
     display_domain display_domain, complex_domain complex_domain
-) : DISPLAY_DOMAIN{display_domain}, to_complex_{display_domain, complex_domain}
-{
-    image_.create(
-        display_domain.end_coordinate.first, display_domain.end_coordinate.second
-    );
-    on_resize_(display_domain);
-}
+) : to_complex_{display_domain, complex_domain}
+{}
 
-void MandelbrotWindow::on_mouse_button_pressed(const sf::Event::MouseButtonEvent& event)
-{
-    selection_start_x_ = event.x;
-    selection_start_y_ = event.y;
-}
-
-void MandelbrotWindow::on_mouse_button_released(const sf::Event::MouseButtonEvent& event
-)
-{
-    auto ends = calculate_rectangle_end_point(
-        {selection_start_x_, selection_start_y_}, {event.x, event.y}
-    );
-    on_resize_({
-        {selection_start_x_, selection_start_y_},
-        ends
-    });
-}
-
-void MandelbrotWindow::set_pixel_color(
-    display_coordinate coordinate, float iteration_ratio
-)
-{
-    color output_color = ratio_to_rgb(iteration_ratio);
-
-    image_.setPixel(
-        coordinate.first, coordinate.second,
-        sf::Color(output_color.red, output_color.green, output_color.blue)
-    );
-}
-
-std::optional<std::unique_ptr<sf::Drawable>> MandelbrotWindow::get_drawable()
-{
-    texture_.loadFromImage(image_);
-    return std::make_unique<sf::Sprite>(texture_);
-}
 } // namespace fractal
