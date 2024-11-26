@@ -1,7 +1,7 @@
 #include "selection_window.hpp"
 
-#include "coordinates.hpp"
 #include "graphics/aspect_ratio/aspect_ratio.hpp"
+#include "units/coordinates.hpp"
 
 namespace fractal {
 
@@ -38,8 +38,8 @@ std::optional<std::unique_ptr<sf::Drawable>> SelectionWindow::get_drawable()
     );
 
     auto rectangle = std::make_unique<sf::RectangleShape>(sf::Vector2f{
-        static_cast<float>(end_point.first) - selection_start_x_,
-        static_cast<float>(end_point.second) - selection_start_y_
+        static_cast<float>(end_point.x) - selection_start_x_,
+        static_cast<float>(end_point.y) - selection_start_y_
     });
     rectangle->setPosition(selection_start_x_, selection_start_y_);
     rectangle->setFillColor(sf::Color(255, 0, 0, 127));

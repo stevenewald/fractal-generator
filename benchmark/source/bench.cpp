@@ -1,5 +1,5 @@
 #include "config.hpp"
-#include "coordinates.hpp"
+#include "units/coordinates.hpp"
 #include "graphics/display_to_complex.hpp"
 #include "mandelbrot/equations.hpp"
 #include "mandelbrot/equations_simd.hpp"
@@ -11,7 +11,7 @@ using namespace fractal;
 
 static void BM_GenerateMandelbrot(benchmark::State& state)
 {
-    display_domain display = {
+    DisplayDomain display = {
         {0,   0  },
         {800, 800}
     };
@@ -32,7 +32,7 @@ static void BM_GenerateMandelbrot(benchmark::State& state)
 
 static void BM_GenerateMandelbrotSimd(benchmark::State& state)
 {
-    display_domain display = {
+    DisplayDomain display = {
         {0,   0  },
         {800, 800}
     };

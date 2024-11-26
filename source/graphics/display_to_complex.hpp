@@ -1,6 +1,6 @@
 #pragma once
 
-#include "coordinates.hpp"
+#include "units/display_domain.hpp"
 #include "units/units.hpp"
 #include "units/units_avx.hpp"
 
@@ -8,7 +8,7 @@
 
 namespace fractal {
 class DisplayToComplexCoordinates {
-    const display_domain DISPLAY_DOMAIN;
+    const DisplayDomain DISPLAY_DOMAIN;
     complex_underlying real_scaling_factor_;
     complex_underlying imaginary_scaling_factor_;
     complex_coordinate complex_domain_start_;
@@ -19,7 +19,7 @@ class DisplayToComplexCoordinates {
     )
     {
         complex_underlying real_d_size = real_domain_size(complex_domain);
-        return real_d_size / static_cast<complex_underlying>(display_top_right.first);
+        return real_d_size / static_cast<complex_underlying>(display_top_right.x);
     }
 
     static complex_underlying imaginary_scaling_factor(
@@ -28,43 +28,45 @@ class DisplayToComplexCoordinates {
     )
     {
         complex_underlying imaginary_d_size = imaginary_domain_size(complex_domain);
-        return imaginary_d_size
-               / static_cast<complex_underlying>(display_top_right.second);
+        return imaginary_d_size / static_cast<complex_underlying>(display_top_right.y);
     }
 
     static complex_coordinate to_complex(display_coordinate coordinate)
     {
         return {
-            static_cast<complex_underlying>(coordinate.first),
-            static_cast<complex_underlying>(coordinate.second)
+            static_cast<complex_underlying>(coordinate.x),
+            static_cast<complex_underlying>(coordinate.y)
         };
     }
 
 public:
     DisplayToComplexCoordinates(
-        display_domain display_domain, const complex_domain& complex_domain
+        const DisplayDomain& display_domain, const complex_domain& complex_domain
     ) :
-        DISPLAY_DOMAIN{std::move(display_domain)},
+        DISPLAY_DOMAIN{display_domain},
         real_scaling_factor_(
-            real_scaling_factor(display_domain.end_coordinate, complex_domain)
+            real_scaling_factor(display_domain.get_end_coordinate(), complex_domain)
         ),
-        imaginary_scaling_factor_(
-            imaginary_scaling_factor(display_domain.end_coordinate, complex_domain)
-        ),
+        imaginary_scaling_factor_(imaginary_scaling_factor(
+            display_domain.get_end_coordinate(), complex_domain
+        )),
         complex_domain_start_(complex_domain.start_coordinate)
     {}
 
-    void update_display_domain(display_domain new_domain)
+    void update_display_domain(const DisplayDomain& new_domain)
     {
         complex_coordinate new_start =
-            to_complex_projection(new_domain.start_coordinate);
-        complex_coordinate new_end = to_complex_projection(new_domain.end_coordinate);
+            to_complex_projection(new_domain.get_start_coordinate());
+        complex_coordinate new_end =
+            to_complex_projection(new_domain.get_end_coordinate());
         complex_domain new_complex_domain = {new_start, new_end};
 
-        real_scaling_factor_ =
-            real_scaling_factor(DISPLAY_DOMAIN.end_coordinate, new_complex_domain);
-        imaginary_scaling_factor_ =
-            imaginary_scaling_factor(DISPLAY_DOMAIN.end_coordinate, new_complex_domain);
+        real_scaling_factor_ = real_scaling_factor(
+            DISPLAY_DOMAIN.get_end_coordinate(), new_complex_domain
+        );
+        imaginary_scaling_factor_ = imaginary_scaling_factor(
+            DISPLAY_DOMAIN.get_end_coordinate(), new_complex_domain
+        );
         complex_domain_start_ = new_complex_domain.start_coordinate;
     }
 

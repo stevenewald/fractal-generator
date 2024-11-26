@@ -21,7 +21,7 @@ class PixelDisplay {
 public:
     explicit PixelDisplay();
 
-    void add_observer(std::unique_ptr<DisplayEventObserver> observer);
+    void add_drawable(std::unique_ptr<DisplayEventObserver> observer);
 
     void poll_window_events();
     void display_window();

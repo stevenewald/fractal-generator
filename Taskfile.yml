@@ -2,7 +2,7 @@ version: '3'
 
 vars:
   NAME: fractal-generator
-  RELEASE_BUILD: "true"
+  RELEASE_BUILD: "false"
   RELEASE_PRESET: "ci-ubuntu"
 
 tasks:
@@ -60,7 +60,7 @@ tasks:
     dir: .
     cmds:
       - task: build
-      - ./build/benchmark/fractal_benchmarks
+      - taskset -c 0 ./build/benchmark/fractal_benchmarks --benchmark_repetitions=5 --benchmark_min_warmup_time=0.5 --benchmark_report_aggregates_only=true
 
   fmt:
     dir: .

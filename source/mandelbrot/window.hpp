@@ -1,11 +1,10 @@
 #pragma once
 
-#include "config.hpp"
-#include "coordinates.hpp"
 #include "graphics/aspect_ratio/aspect_ratio.hpp"
 #include "graphics/color_conversions/color_conversions.hpp"
 #include "graphics/display_event_observer.hpp"
 #include "mandelbrot/mandelbrot_window.hpp"
+#include "units/coordinates.hpp"
 #include "units/units.hpp"
 
 #include <SFML/Graphics/Image.hpp>
@@ -13,7 +12,7 @@
 
 namespace fractal {
 class Window : public DisplayEventObserver {
-    const display_domain DISPLAY_DOMAIN;
+    const DisplayDomain DISPLAY_DOMAIN;
     complex_domain complex_domain_;
     MandelbrotWindow mandelbrot_;
 
@@ -28,23 +27,23 @@ public:
         color output_color = ratio_to_rgb(iteration_ratio);
 
         image_.setPixel(
-            coordinate.first, coordinate.second,
+            coordinate.x, coordinate.y,
             sf::Color(output_color.red, output_color.green, output_color.blue)
         );
     }
 
-    Window(display_domain display_domain, complex_domain complex_domain) :
+    Window(DisplayDomain display_domain, complex_domain complex_domain) :
         DISPLAY_DOMAIN{display_domain}, complex_domain_{complex_domain},
         mandelbrot_{display_domain, complex_domain}
     {
         image_.create(
-            display_domain.end_coordinate.first + 1u,
-            display_domain.end_coordinate.second + 1u
+            display_domain.get_end_coordinate().x + 1u,
+            display_domain.get_end_coordinate().y + 1u
         );
 
         auto res = mandelbrot_.calculate_(display_domain, display_domain);
         for (display_coordinate pos : DISPLAY_DOMAIN) {
-            set_pixel_color(pos, res[pos.first][pos.second]);
+            set_pixel_color(pos, res[pos.x][pos.y]);
         }
     }
 
@@ -68,7 +67,7 @@ public:
         }
         );
         for (display_coordinate pos : DISPLAY_DOMAIN) {
-            set_pixel_color(pos, res[pos.first][pos.second]);
+            set_pixel_color(pos, res[pos.x][pos.y]);
         }
     }
 

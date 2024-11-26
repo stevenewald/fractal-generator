@@ -1,9 +1,9 @@
 #include "mandelbrot_window.hpp"
 
 #include "config.hpp"
-#include "coordinates.hpp"
 #include "equations_simd.hpp"
 #include "graphics/display_to_complex.hpp"
+#include "units/coordinates.hpp"
 #include "units/units.hpp"
 
 #include <fmt/format.h>
@@ -31,13 +31,13 @@ std::array<float, 8> MandelbrotWindow::draw_coordinate_(
     std::array<float, 8> ret{};
     for (size_t i = 0; i < 8; i++) {
         ret[i] = static_cast<float>(iterations[i]) / MANDELBROT_MAX_ITERATIONS;
-        display_coord.first++;
+        display_coord.x++;
     }
     return ret;
 }
 
 MandelbrotWindow::arr MandelbrotWindow::calculate_(
-    display_domain full_display_domain, display_domain new_domain_selection
+    const DisplayDomain& full_display_domain, const DisplayDomain& new_domain_selection
 )
 {
     to_complex_.update_display_domain(new_domain_selection);
@@ -47,13 +47,13 @@ MandelbrotWindow::arr MandelbrotWindow::calculate_(
     };
 
     arr ret;
-    auto process_chunk = [&](display_domain::DisplayCoordinateIterator start,
-                             display_domain::DisplayCoordinateIterator end) {
+    auto process_chunk = [&](DisplayDomain::DisplayCoordinateIterator start,
+                             DisplayDomain::DisplayCoordinateIterator end) {
         for (auto it = start; it != end; it += 8) {
             auto pos = *it;
             std::array<float, 8> t = process_coordinates(pos);
             for (size_t i = 0; i < 8; i++) {
-                ret[pos.first++][pos.second] = Percentage{t[i]};
+                ret[pos.x++][pos.y] = Percentage{t[i]};
             }
         }
     };
@@ -70,7 +70,7 @@ MandelbrotWindow::arr MandelbrotWindow::calculate_(
     auto start = std::chrono::high_resolution_clock::now();
 
     for (uint32_t chunk = 0; chunk < chunks; chunk++) {
-        display_domain::DisplayCoordinateIterator it_start =
+        DisplayDomain::DisplayCoordinateIterator it_start =
             full_display_domain.begin() + chunk * step;
         auto end = (chunk + 1) * step <= full_display_domain.size()
                        ? it_start + step
@@ -89,7 +89,7 @@ MandelbrotWindow::arr MandelbrotWindow::calculate_(
 }
 
 MandelbrotWindow::MandelbrotWindow(
-    display_domain display_domain, complex_domain complex_domain
+    const DisplayDomain& display_domain, const complex_domain& complex_domain
 ) : to_complex_{display_domain, complex_domain}
 {}
 

@@ -14,7 +14,7 @@ include(cmake/project-is-top-level.cmake)
 include(cmake/variables.cmake)
 
 set(CMAKE_INTERPROCEDURAL_OPTIMIZATION ON)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=x86-64 -mavx512f -mavx512dq -mavx512vl -mavx512bf16")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native -mavx512f -mavx512dq -mavx512vl -mavx512bf16")
 # add_compile_options(-fno-inline -fno-omit-frame-pointer)
 
 
@@ -29,6 +29,7 @@ add_library(
     source/graphics/aspect_ratio/aspect_ratio.cpp
     source/mandelbrot/equations_simd.cpp
     source/mandelbrot/equations.cpp
+    source/units/coordinates.cpp
 )
 
 target_include_directories(

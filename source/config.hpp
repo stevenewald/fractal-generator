@@ -1,6 +1,6 @@
 #pragma once
 
-#include "coordinates.hpp"
+#include "units/coordinates.hpp"
 #include "units/units.hpp"
 
 #include <cstddef>
