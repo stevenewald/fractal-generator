@@ -7,8 +7,8 @@
 
 namespace fractal {
 
-constexpr std::size_t WINDOW_WIDTH = 800UZ*2;
-constexpr std::size_t WINDOW_HEIGHT = 600UZ*2;
+constexpr std::size_t WINDOW_WIDTH = 5120;
+constexpr std::size_t WINDOW_HEIGHT = 1440;
 constexpr std::size_t FRAME_RATE = 60UZ;
 
 constexpr display_domain DISPLAY_DOMAIN{
@@ -17,8 +17,8 @@ constexpr display_domain DISPLAY_DOMAIN{
 };
 
 constexpr complex_domain START_COMPLEX_DOMAIN{
-    {complex_underlying{-2}, complex_underlying{-1.5}},
-    {complex_underlying{1},  complex_underlying{1.5} }
+    {complex_underlying{-1.402}, complex_underlying{-.001}},
+    {complex_underlying{-1.400}, complex_underlying{.001} }
 };
 
 const complex_underlying MANDELBROT_DIVERGENCE_NORM = 4;
