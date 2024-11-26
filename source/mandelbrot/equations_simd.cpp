@@ -1,4 +1,5 @@
 #include "config.hpp"
+#include "equations.hpp"
 #include "units/units.hpp"
 #include "units/units_avx.hpp"
 

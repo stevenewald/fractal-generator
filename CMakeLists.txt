@@ -14,7 +14,7 @@ include(cmake/project-is-top-level.cmake)
 include(cmake/variables.cmake)
 
 set(CMAKE_INTERPROCEDURAL_OPTIMIZATION ON)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native -mavx512f -mavx512dq -mavx512vl -mavx512bf16")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native")
 # add_compile_options(-fno-inline -fno-omit-frame-pointer)
 
 
@@ -27,10 +27,20 @@ add_library(
     source/mandelbrot/mandelbrot_window.cpp
     source/graphics/color_conversions/color_conversions.cpp
     source/graphics/aspect_ratio/aspect_ratio.cpp
-    source/mandelbrot/equations_simd.cpp
-    source/mandelbrot/equations.cpp
     source/units/coordinates.cpp
 )
+
+include(CheckCXXCompilerFlag)
+check_cxx_compiler_flag("-mavx512f -mavx512dq -mavx512vl -mavx512bf16" HAS_AVX512)
+
+if (HAS_ALL_AVX512)
+    message(STATUS "AVX-512 is supported by the compiler.")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mavx512f -mavx512dq -mavx512vl -mavx512bf16")
+	target_sources(fractal-generator_lib PRIVATE source/mandelbrot/equations_simd.cpp)
+else()
+    message(STATUS "AVX-512 is not fully supported by the compiler. AVX-512 will not be enabled.")
+	target_sources(fractal-generator_lib PRIVATE source/mandelbrot/equations_compat.cpp)
+endif()
 
 target_include_directories(
     fractal-generator_lib ${warning_guard}

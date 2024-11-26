@@ -7,8 +7,8 @@
 
 namespace fractal {
 
-constexpr std::size_t WINDOW_WIDTH = 800UZ * 2;
-constexpr std::size_t WINDOW_HEIGHT = 600UZ * 2;
+constexpr std::size_t WINDOW_WIDTH = 800UZ;
+constexpr std::size_t WINDOW_HEIGHT = 600UZ;
 constexpr std::size_t FRAME_RATE = 60UZ;
 
 constexpr complex_domain START_COMPLEX_DOMAIN{

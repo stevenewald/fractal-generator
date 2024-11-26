@@ -2,8 +2,8 @@ version: '3'
 
 vars:
   NAME: fractal-generator
-  RELEASE_BUILD: "false"
-  RELEASE_PRESET: "ci-ubuntu"
+  RELEASE_BUILD: "true"
+  RELEASE_PRESET: "ci-macos"
 
 tasks:
   deps:
@@ -18,7 +18,7 @@ tasks:
       - test -f CMakeUserPresets.json
     cmds:
       - cmake --preset=dev
-      - cmake --preset={{.RELEASE_PRESET}}
+      - cmake --preset={{.RELEASE_PRESET}} -DCMAKE_BUILD_TYPE=Release
 
 
   build:

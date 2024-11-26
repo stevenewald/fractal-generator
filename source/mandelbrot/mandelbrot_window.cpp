@@ -1,13 +1,12 @@
 #include "mandelbrot_window.hpp"
 
 #include "config.hpp"
-#include "equations_simd.hpp"
+#include "equations.hpp"
 #include "graphics/display_to_complex.hpp"
 #include "units/coordinates.hpp"
 #include "units/units.hpp"
 
 #include <fmt/format.h>
-#include <immintrin.h>
 #include <SFML/Graphics/Drawable.hpp>
 #include <SFML/Graphics/Image.hpp>
 #include <SFML/Graphics/Sprite.hpp>
@@ -90,7 +89,8 @@ MandelbrotWindow::arr MandelbrotWindow::calculate_(
 
 MandelbrotWindow::MandelbrotWindow(
     const DisplayDomain& display_domain, const complex_domain& complex_domain
-) : to_complex_{display_domain, complex_domain}
+) :
+    to_complex_{display_domain, complex_domain}
 {}
 
 } // namespace fractal
