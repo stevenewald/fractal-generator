@@ -89,7 +89,7 @@ public:
                               + (raw_complex_coord.real() + i) * real_scaling_factor_;
             complex.imaginary[i] =
                 complex_domain_start_.imag()
-                + raw_complex_coord.imag() * imaginary_scaling_factor_;
+                + (raw_complex_coord.imag()) * imaginary_scaling_factor_;
         }
         return complex;
     }

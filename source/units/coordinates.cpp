@@ -11,8 +11,8 @@ decay_2d_coordinate(const display_coordinate& coordinate, uint32_t display_width
 display_coordinate generate_1d_coordinate(uint32_t coordinate, uint32_t display_width)
 {
     return {
-        coordinate % display_width,
-        (coordinate - coordinate % display_width) / display_width
+        coordinate % (display_width + 1),
+        (coordinate - (coordinate % (display_width + 1))) / display_width
     };
 }
 } // namespace fractal

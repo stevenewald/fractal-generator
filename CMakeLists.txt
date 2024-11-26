@@ -32,13 +32,22 @@ add_library(
 
 include(CheckCXXCompilerFlag)
 check_cxx_compiler_flag("-mavx512f -mavx512dq -mavx512vl -mavx512bf16" HAS_AVX512)
+check_cxx_source_compiles("
+        #include <arm_neon.h>
+        int main() {
+            float32x4_t vec = vdupq_n_f32(0.0f);
+            return 0;
+		}" HAS_NEON)
 
 if (HAS_ALL_AVX512)
     message(STATUS "AVX-512 is supported by the compiler.")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mavx512f -mavx512dq -mavx512vl -mavx512bf16")
 	target_sources(fractal-generator_lib PRIVATE source/mandelbrot/equations_simd.cpp)
+elseif(HAS_NEON)
+	message(STATUS "ARM NEON is supported by the compiler.")
+	target_sources(fractal-generator_lib PRIVATE source/mandelbrot/equations_neon.cpp)
 else()
-    message(STATUS "AVX-512 is not fully supported by the compiler. AVX-512 will not be enabled.")
+	message(STATUS "SIMD is not fully supported by the compiler. SIMD will not be enabled.")
 	target_sources(fractal-generator_lib PRIVATE source/mandelbrot/equations_compat.cpp)
 endif()
 

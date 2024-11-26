@@ -49,9 +49,9 @@ MandelbrotWindow::arr MandelbrotWindow::calculate_(
     auto process_chunk = [&](DisplayDomain::DisplayCoordinateIterator start,
                              DisplayDomain::DisplayCoordinateIterator end) {
         for (auto it = start; it != end; it += 8) {
-            auto pos = *it;
+            display_coordinate pos = *it;
             std::array<float, 8> t = process_coordinates(pos);
-            for (size_t i = 0; i < 8; i++) {
+            for (size_t i = 0; i < 8; ++i) {
                 ret[pos.x++][pos.y] = Percentage{t[i]};
             }
         }
