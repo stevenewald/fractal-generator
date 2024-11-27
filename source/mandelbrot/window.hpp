@@ -42,9 +42,9 @@ public:
             display_domain.get_end_coordinate().y + 1u
         );
 
-        auto res = mandelbrot_.calculate_(display_domain, display_domain);
+        auto res = mandelbrot_.calculate_(DISPLAY_DOMAIN, DISPLAY_DOMAIN);
         for (display_coordinate pos : DISPLAY_DOMAIN) {
-            set_pixel_color(pos, res[pos.x][pos.y]);
+            set_pixel_color(pos, (*res)[pos.x][pos.y]);
         }
     }
 
@@ -62,7 +62,7 @@ public:
         );
         auto res = mandelbrot_.calculate_(DISPLAY_DOMAIN, ends);
         for (display_coordinate pos : DISPLAY_DOMAIN) {
-            set_pixel_color(pos, res[pos.x][pos.y]);
+            set_pixel_color(pos, (*res)[pos.x][pos.y]);
         }
     }
 

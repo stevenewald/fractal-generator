@@ -35,7 +35,7 @@ std::array<float, 8> MandelbrotWindow::draw_coordinate_(
     return ret;
 }
 
-MandelbrotWindow::arr MandelbrotWindow::calculate_(
+std::unique_ptr<MandelbrotWindow::arr> MandelbrotWindow::calculate_(
     const DisplayDomain& full_display_domain, const DisplayDomain& new_domain_selection
 )
 {
@@ -45,14 +45,14 @@ MandelbrotWindow::arr MandelbrotWindow::calculate_(
         return draw_coordinate_(coord, to_complex_.to_complex_projections(coord));
     };
 
-    arr ret;
+    auto ret = std::make_unique<arr>();
     auto process_chunk = [&](DisplayDomain::DisplayCoordinateIterator start,
                              DisplayDomain::DisplayCoordinateIterator end) {
         for (auto it = start; it != end; it += 8) {
             display_coordinate pos = *it;
             std::array<float, 8> t = process_coordinates(pos);
             for (size_t i = 0; i < 8; ++i) {
-                ret[pos.x++][pos.y] = Percentage{t[i]};
+                (*ret)[pos.x++][pos.y] = Percentage{t[i]};
             }
         }
     };

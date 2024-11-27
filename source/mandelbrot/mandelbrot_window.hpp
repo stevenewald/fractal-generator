@@ -10,6 +10,8 @@
 #include <SFML/Graphics/Sprite.hpp>
 #include <SFML/Graphics/Texture.hpp>
 
+#include <memory>
+
 namespace fractal {
 class MandelbrotWindow {
     using arr = std::array<std::array<Percentage, WINDOW_HEIGHT + 8>, WINDOW_WIDTH + 8>;
@@ -24,7 +26,7 @@ public:
         const DisplayDomain& display_domain, const complex_domain& complex_domain
     );
 
-    arr calculate_(
+    std::unique_ptr<arr> calculate_(
         const DisplayDomain& full_display_domain,
         const DisplayDomain& new_domain_selection
     );
