@@ -1,14 +1,10 @@
 #pragma once
 
-#include "units.hpp"
+#include "units/units_avx.hpp"
 
 namespace fractal {
-// https://en.wikipedia.org/wiki/Mandelbrot_set#Formal_definition
-std::complex<complex_underlying>
-step(std::complex<complex_underlying> z_n, std::complex<complex_underlying> constant);
 
-iteration_count compute_iterations(
-    std::complex<complex_underlying> z_0, std::complex<complex_underlying> constant,
-    iteration_count max_iters
+std::array<iteration_count, 8> compute_iterations(
+    const avx512_complex& z_0, const avx512_complex& constant, iteration_count max_iters
 );
 } // namespace fractal

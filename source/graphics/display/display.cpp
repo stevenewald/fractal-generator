@@ -41,7 +41,7 @@ void PixelDisplay::handle_event_(const sf::Event& event)
     }
 }
 
-void PixelDisplay::add_observer(std::unique_ptr<DisplayEventObserver> observer)
+void PixelDisplay::add_drawable(std::unique_ptr<DisplayEventObserver> observer)
 {
     observers_.push_back(std::move(observer));
 }

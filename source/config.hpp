@@ -1,20 +1,15 @@
 #pragma once
 
-#include "coordinates.hpp"
-#include "units.hpp"
+#include "units/coordinates.hpp"
+#include "units/units.hpp"
 
 #include <cstddef>
 
 namespace fractal {
 
-constexpr std::size_t WINDOW_WIDTH = 5120;
-constexpr std::size_t WINDOW_HEIGHT = 1440;
+constexpr std::size_t WINDOW_WIDTH = 800UZ;
+constexpr std::size_t WINDOW_HEIGHT = 600UZ;
 constexpr std::size_t FRAME_RATE = 60UZ;
-
-constexpr display_domain DISPLAY_DOMAIN{
-    {0,                0                },
-    {WINDOW_WIDTH - 1, WINDOW_HEIGHT - 1}
-};
 
 constexpr complex_domain START_COMPLEX_DOMAIN{
     {complex_underlying{-1.402}, complex_underlying{-.001}},

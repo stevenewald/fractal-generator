@@ -14,8 +14,8 @@ include(cmake/project-is-top-level.cmake)
 include(cmake/variables.cmake)
 
 set(CMAKE_INTERPROCEDURAL_OPTIMIZATION ON)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=x86-64 -mavx512f -mavx512dq -mavx512vl -mavx512bf16")
-add_compile_options(-fno-inline -fno-omit-frame-pointer)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native")
+# add_compile_options(-fno-inline -fno-omit-frame-pointer)
 
 
 # ---- Declare library ----
@@ -27,9 +27,29 @@ add_library(
     source/mandelbrot/mandelbrot_window.cpp
     source/graphics/color_conversions/color_conversions.cpp
     source/graphics/aspect_ratio/aspect_ratio.cpp
-    source/mandelbrot/equations_simd.cpp
-    source/mandelbrot/equations.cpp
+    source/units/coordinates.cpp
 )
+
+include(CheckCXXCompilerFlag)
+check_cxx_compiler_flag("-mavx512f -mavx512dq -mavx512vl -mavx512bf16" HAS_AVX512)
+check_cxx_source_compiles("
+        #include <arm_neon.h>
+        int main() {
+            float32x4_t vec = vdupq_n_f32(0.0f);
+            return 0;
+		}" HAS_NEON)
+
+if (HAS_ALL_AVX512)
+    message(STATUS "AVX-512 is supported by the compiler.")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mavx512f -mavx512dq -mavx512vl -mavx512bf16")
+	target_sources(fractal-generator_lib PRIVATE source/mandelbrot/equations_simd.cpp)
+elseif(HAS_NEON)
+	message(STATUS "ARM NEON is supported by the compiler.")
+	target_sources(fractal-generator_lib PRIVATE source/mandelbrot/equations_neon.cpp)
+else()
+	message(STATUS "SIMD is not fully supported by the compiler. SIMD will not be enabled.")
+	target_sources(fractal-generator_lib PRIVATE source/mandelbrot/equations_compat.cpp)
+endif()
 
 target_include_directories(
     fractal-generator_lib ${warning_guard}
@@ -37,7 +57,7 @@ target_include_directories(
     "\$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/source>"
 )
 
-target_compile_features(fractal-generator_lib PUBLIC cxx_std_20)
+target_compile_features(fractal-generator_lib PUBLIC cxx_std_23)
 
 find_package(fmt REQUIRED)
 find_package(argparse REQUIRED)
@@ -55,8 +75,9 @@ add_executable(fractal-generator::exe ALIAS fractal-generator_exe)
 
 set_property(TARGET fractal-generator_exe PROPERTY OUTPUT_NAME fractal-generator)
 
-target_compile_features(fractal-generator_exe PRIVATE cxx_std_20)
+target_compile_features(fractal-generator_exe PRIVATE cxx_std_23)
 
+target_link_libraries(fractal-generator_exe PRIVATE fmt::fmt)
 target_link_libraries(fractal-generator_exe PRIVATE fractal-generator_lib)
 target_link_libraries(fractal-generator_exe PRIVATE argparse::argparse)
 target_link_libraries(fractal-generator_exe PRIVATE sfml-graphics)

@@ -17,7 +17,7 @@ target_link_libraries(
     fractal-generator_lib
     Catch2::Catch2WithMain
 )
-target_compile_features(fractal-generator_test PRIVATE cxx_std_20)
+target_compile_features(fractal-generator_test PRIVATE cxx_std_23)
 
 catch_discover_tests(fractal-generator_test)
 
