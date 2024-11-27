@@ -1,8 +1,10 @@
 #include "aspect_ratio.hpp"
 
+#include "units/display_domain.hpp"
+
 namespace fractal {
 
-display_coordinate calculate_rectangle_end_point(
+DisplayDomain calculate_rectangle_end_points(
     display_coordinate start, display_coordinate current, float target_aspect_ratio
 )
 {
@@ -19,18 +21,30 @@ display_coordinate calculate_rectangle_end_point(
         height = width / target_aspect_ratio;
     }
 
-    auto new_x = static_cast<float>(std::min(current.x, start.x));
-    auto new_y = static_cast<float>(std::min(current.y, start.y));
+    auto x_pos1 = static_cast<float>(start.x);
+    auto y_pos1 = static_cast<float>(start.y);
+    auto x_pos2 = x_pos1 + width;
+    auto y_pos2 = y_pos1 + height;
 
-    // Adjust the top-left corner based on new dimensions
-    if (current.x < start.x) {
-        new_x = static_cast<float>(start.x) - width;
+    bool flipped_horizontal = start.x > current.x;
+    bool flipped_vertical = start.y > current.y;
+
+    if (flipped_vertical) {
+        y_pos1 -= height;
+        y_pos2 -= height;
     }
-    if (current.y < start.y) {
-        new_y = static_cast<float>(start.y) - height;
+    if (flipped_horizontal) {
+        x_pos1 -= width;
+        x_pos2 -= width;
     }
 
-    // Return the top-left and bottom-right corners as a pair of sf::Vector2f
-    return {new_x + width, new_y + height};
+    display_coordinate top_left{
+        static_cast<uint16_t>(x_pos1), static_cast<uint16_t>(y_pos1)
+    };
+    display_coordinate bottom_right{
+        static_cast<uint16_t>(x_pos2), static_cast<uint16_t>(y_pos2)
+    };
+
+    return {top_left, bottom_right};
 }
 } // namespace fractal

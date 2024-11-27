@@ -1,6 +1,7 @@
 #pragma once
 
 #include "coordinates.hpp"
+#include "util.hpp"
 
 #include <iterator>
 
@@ -13,7 +14,10 @@ class DisplayDomain {
 public:
     DisplayDomain(display_coordinate start, display_coordinate end) :
         START_COORDINATE{start}, END_COORDINATE{end}
-    {}
+    {
+        assert_true(start.x <= end.x);
+        assert_true(start.y <= end.y);
+    }
 
     const display_coordinate& get_start_coordinate() const { return START_COORDINATE; }
 
@@ -31,7 +35,7 @@ public:
         using reference = display_coordinate&;
 
         explicit DisplayCoordinateIterator(const DisplayDomain& domain) :
-            GRID_WIDTH{domain.get_end_coordinate().x},
+            GRID_WIDTH{domain.get_end_coordinate().x + 1u},
             current_coordinate_{
                 decay_2d_coordinate(domain.get_start_coordinate(), GRID_WIDTH)
             }
@@ -76,6 +80,10 @@ public:
 
         bool operator==(const DisplayCoordinateIterator&) const = default;
     };
+
+    uint32_t width() const { return END_COORDINATE.x - START_COORDINATE.x; }
+
+    uint32_t height() const { return END_COORDINATE.y - START_COORDINATE.y; }
 
     DisplayCoordinateIterator begin() const { return DisplayCoordinateIterator{*this}; }
 

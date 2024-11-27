@@ -89,8 +89,7 @@ MandelbrotWindow::arr MandelbrotWindow::calculate_(
 
 MandelbrotWindow::MandelbrotWindow(
     const DisplayDomain& display_domain, const complex_domain& complex_domain
-) :
-    to_complex_{display_domain, complex_domain}
+) : to_complex_{display_domain, complex_domain}
 {}
 
 } // namespace fractal

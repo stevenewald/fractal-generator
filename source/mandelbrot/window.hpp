@@ -5,6 +5,7 @@
 #include "graphics/display_event_observer.hpp"
 #include "mandelbrot/mandelbrot_window.hpp"
 #include "units/coordinates.hpp"
+#include "units/display_domain.hpp"
 #include "units/units.hpp"
 
 #include <SFML/Graphics/Image.hpp>
@@ -56,16 +57,10 @@ public:
 
     void on_mouse_button_released(const sf::Event::MouseButtonEvent& event) override
     {
-        auto ends = calculate_rectangle_end_point(
+        DisplayDomain ends = calculate_rectangle_end_points(
             {selection_start_x_, selection_start_y_}, {event.x, event.y}
         );
-        auto res = mandelbrot_.calculate_(
-            DISPLAY_DOMAIN,
-            {
-                {selection_start_x_, selection_start_y_},
-                ends
-        }
-        );
+        auto res = mandelbrot_.calculate_(DISPLAY_DOMAIN, ends);
         for (display_coordinate pos : DISPLAY_DOMAIN) {
             set_pixel_color(pos, res[pos.x][pos.y]);
         }
