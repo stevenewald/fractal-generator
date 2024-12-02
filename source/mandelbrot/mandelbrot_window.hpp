@@ -23,7 +23,7 @@ public:
 
     using pixel_iteration_counts =
         std::array<iteration_count, WINDOW_HEIGHT * WINDOW_WIDTH>;
-    std::unique_ptr<pixel_iteration_counts> calculate_(
+    std::unique_ptr<pixel_iteration_counts> calculate(
         const DisplayDomain& full_display_domain,
         const DisplayDomain& new_domain_selection
     );
