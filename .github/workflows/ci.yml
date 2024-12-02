@@ -94,6 +94,13 @@ jobs:
 
     runs-on: ${{ matrix.os }}
 
+    env:
+      CC: clang-18
+      CXX: clang++-18
+      CLANG_DIR: '/usr/lib/llvm-18/lib/cmake/clang'
+      LLVM_DIR: '/usr/lib/llvm-18/lib/cmake/llvm'
+
+
     steps:
     - uses: actions/checkout@v4
 
