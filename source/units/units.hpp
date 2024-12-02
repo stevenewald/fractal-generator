@@ -5,7 +5,7 @@
 #include <cstdint>
 
 namespace fractal {
-using iteration_count = std::uint16_t;
+using iteration_count = std::uint32_t;
 
 using complex_underlying = double;
 

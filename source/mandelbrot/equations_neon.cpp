@@ -72,7 +72,7 @@ std::array<iteration_count, 2> compute_iterations_neon(
     // store the iteration counts
     alignas(16) std::array<uint64_t, 2> ret{};
     vst1q_u64(ret.data(), solved_its_vec);
-    std::array ret2{static_cast<uint16_t>(ret[0]), static_cast<uint16_t>(ret[1])};
+    std::array ret2{static_cast<uint32_t>(ret[0]), static_cast<uint32_t>(ret[1])};
 
     return ret2;
 }
