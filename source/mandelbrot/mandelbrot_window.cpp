@@ -19,41 +19,25 @@
 #include <iostream>
 
 namespace fractal {
-std::array<float, 8> MandelbrotWindow::draw_coordinate_(
-    display_coordinate display_coord, const avx512_complex& complex_coords
-)
-{
-    static constexpr avx512_complex START{};
-    std::array<iteration_count, 8> iterations =
-        compute_iterations(START, complex_coords, MANDELBROT_MAX_ITERATIONS);
 
-    std::array<float, 8> ret{};
-    for (size_t i = 0; i < 8; i++) {
-        ret[i] = static_cast<float>(iterations[i]) / MANDELBROT_MAX_ITERATIONS;
-        display_coord.x++;
-    }
-    return ret;
-}
-
-std::unique_ptr<MandelbrotWindow::arr> MandelbrotWindow::calculate_(
+std::unique_ptr<MandelbrotWindow::pixel_iteration_counts> MandelbrotWindow::calculate_(
     const DisplayDomain& full_display_domain, const DisplayDomain& new_domain_selection
 )
 {
     to_complex_.update_display_domain(new_domain_selection);
 
     auto process_coordinates = [&](display_coordinate coord) {
-        return draw_coordinate_(coord, to_complex_.to_complex_projections(coord));
+        return compute_iterations(
+            {}, to_complex_.to_complex_projections(coord), MANDELBROT_MAX_ITERATIONS
+        );
     };
 
-    auto ret = std::make_unique<arr>();
+    auto ret = std::make_unique<pixel_iteration_counts>();
     auto process_chunk = [&](DisplayDomain::DisplayCoordinateIterator start,
                              DisplayDomain::DisplayCoordinateIterator end) {
         for (auto it = start; it != end; it += 8) {
-            display_coordinate pos = *it;
-            std::array<float, 8> t = process_coordinates(pos);
-            for (size_t i = 0; i < 8; ++i) {
-                (*ret)[pos.x++][pos.y] = Percentage{t[i]};
-            }
+            std::array<iteration_count, 8> t = process_coordinates(*it);
+            std::copy(t.begin(), t.end(), ret->begin() + it.get_underlying());
         }
     };
 

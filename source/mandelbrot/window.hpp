@@ -1,5 +1,6 @@
 #pragma once
 
+#include "config.hpp"
 #include "graphics/aspect_ratio/aspect_ratio.hpp"
 #include "graphics/color_conversions/color_conversions.hpp"
 #include "graphics/display_event_observer.hpp"
@@ -33,6 +34,18 @@ public:
         );
     }
 
+    void
+    set_pixel_colors(std::unique_ptr<MandelbrotWindow::pixel_iteration_counts> pixels)
+    {
+        for (auto it = DISPLAY_DOMAIN.begin(); it != DISPLAY_DOMAIN.end(); ++it) {
+            Percentage color(
+                static_cast<float>((*pixels)[it.get_underlying()])
+                / MANDELBROT_MAX_ITERATIONS
+            );
+            set_pixel_color(*it, color);
+        }
+    }
+
     Window(DisplayDomain display_domain, complex_domain complex_domain) :
         DISPLAY_DOMAIN{display_domain}, complex_domain_{complex_domain},
         mandelbrot_{display_domain, complex_domain}
@@ -42,10 +55,7 @@ public:
             display_domain.get_end_coordinate().y + 1u
         );
 
-        auto res = mandelbrot_.calculate_(DISPLAY_DOMAIN, DISPLAY_DOMAIN);
-        for (display_coordinate pos : DISPLAY_DOMAIN) {
-            set_pixel_color(pos, (*res)[pos.x][pos.y]);
-        }
+        set_pixel_colors(mandelbrot_.calculate_(DISPLAY_DOMAIN, DISPLAY_DOMAIN));
     }
 
     void on_mouse_button_pressed(const sf::Event::MouseButtonEvent& event) override
@@ -60,10 +70,7 @@ public:
         DisplayDomain ends = calculate_rectangle_end_points(
             {selection_start_x_, selection_start_y_}, {event.x, event.y}
         );
-        auto res = mandelbrot_.calculate_(DISPLAY_DOMAIN, ends);
-        for (display_coordinate pos : DISPLAY_DOMAIN) {
-            set_pixel_color(pos, (*res)[pos.x][pos.y]);
-        }
+        set_pixel_colors(mandelbrot_.calculate_(DISPLAY_DOMAIN, ends));
     }
 
     std::optional<std::unique_ptr<sf::Drawable>> get_drawable() override

@@ -25,7 +25,7 @@ public:
         assert_true(percentage <= 1.0f);
     }
 
-    consteval explicit Percentage() : percentage_{0.0f} {}
+    constexpr explicit Percentage() : percentage_{0.0f} {}
 
     float get_percentage() const { return percentage_; }
 };

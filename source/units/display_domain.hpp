@@ -79,6 +79,8 @@ public:
         }
 
         bool operator==(const DisplayCoordinateIterator&) const = default;
+
+        uint32_t get_underlying() const { return current_coordinate_; }
     };
 
     uint32_t width() const { return END_COORDINATE.x - START_COORDINATE.x; }
