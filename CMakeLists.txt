@@ -13,9 +13,9 @@ project(
 include(cmake/project-is-top-level.cmake)
 include(cmake/variables.cmake)
 
-set(CMAKE_INTERPROCEDURAL_OPTIMIZATION ON)
+# set(CMAKE_INTERPROCEDURAL_OPTIMIZATION ON)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native")
-# add_compile_options(-fno-inline -fno-omit-frame-pointer)
+add_compile_options(-fno-inline -fno-omit-frame-pointer)
 
 
 # ---- Declare library ----
@@ -30,8 +30,15 @@ add_library(
     source/units/coordinates.cpp
 )
 
+option(ENABLE_SIMD "Enable SIMD instructions if available" ON)
+
 include(CheckCXXCompilerFlag)
-check_cxx_compiler_flag("-mavx512f -mavx512dq -mavx512vl -mavx512bf16" HAS_AVX512)
+check_cxx_source_compiles("
+		#include <immintrin.h>
+        int main() {
+			__m512i t = _mm512_set1_epi64(0);
+            return 0;
+		}" HAS_AVX512)
 check_cxx_source_compiles("
         #include <arm_neon.h>
         int main() {
@@ -39,15 +46,15 @@ check_cxx_source_compiles("
             return 0;
 		}" HAS_NEON)
 
-if (HAS_ALL_AVX512)
+if (HAS_AVX512 AND ENABLE_SIMD)
     message(STATUS "AVX-512 is supported by the compiler.")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mavx512f -mavx512dq -mavx512vl -mavx512bf16")
 	target_sources(fractal-generator_lib PRIVATE source/mandelbrot/equations_simd.cpp)
-elseif(HAS_NEON)
+elseif(HAS_NEON AND ENABLE_SIMD)
 	message(STATUS "ARM NEON is supported by the compiler.")
 	target_sources(fractal-generator_lib PRIVATE source/mandelbrot/equations_neon.cpp)
 else()
-	message(STATUS "SIMD is not fully supported by the compiler. SIMD will not be enabled.")
+	message(STATUS "SIMD is not supported by the compiler. SIMD will not be enabled.")
 	target_sources(fractal-generator_lib PRIVATE source/mandelbrot/equations_compat.cpp)
 endif()
 
