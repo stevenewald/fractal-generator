@@ -20,7 +20,7 @@
 
 namespace fractal {
 
-std::unique_ptr<MandelbrotWindow::pixel_iteration_counts> MandelbrotWindow::calculate_(
+std::unique_ptr<MandelbrotWindow::pixel_iteration_counts> MandelbrotWindow::calculate(
     const DisplayDomain& full_display_domain, const DisplayDomain& new_domain_selection
 )
 {

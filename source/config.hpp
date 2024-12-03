@@ -12,8 +12,8 @@ constexpr std::size_t WINDOW_HEIGHT = 600UZ * 2;
 constexpr std::size_t FRAME_RATE = 60UZ;
 
 constexpr complex_domain START_COMPLEX_DOMAIN{
-    {complex_underlying{-1.402}, complex_underlying{-.001}},
-    {complex_underlying{-1.400}, complex_underlying{.001} }
+    complex_coordinate{-2, -1  },
+    complex_coordinate{1,  1.25}
 };
 
 const complex_underlying MANDELBROT_DIVERGENCE_NORM = 4;

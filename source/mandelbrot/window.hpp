@@ -55,7 +55,7 @@ public:
             display_domain.get_end_coordinate().y + 1u
         );
 
-        set_pixel_colors(mandelbrot_.calculate_(DISPLAY_DOMAIN, DISPLAY_DOMAIN));
+        set_pixel_colors(mandelbrot_.calculate(DISPLAY_DOMAIN, DISPLAY_DOMAIN));
     }
 
     void on_mouse_button_pressed(const sf::Event::MouseButtonEvent& event) override
@@ -70,7 +70,7 @@ public:
         DisplayDomain ends = calculate_rectangle_end_points(
             {selection_start_x_, selection_start_y_}, {event.x, event.y}
         );
-        set_pixel_colors(mandelbrot_.calculate_(DISPLAY_DOMAIN, ends));
+        set_pixel_colors(mandelbrot_.calculate(DISPLAY_DOMAIN, ends));
     }
 
     std::optional<std::unique_ptr<sf::Drawable>> get_drawable() override
