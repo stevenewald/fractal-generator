@@ -36,56 +36,7 @@ jobs:
       if: always()
       run: cmake -P cmake/spell.cmake
 
-  sanitize:
-    needs: [lint]
-
-    runs-on: ubuntu-22.04
-
-    env: { CXX: clang++-18 }
-
-    steps:
-    - uses: actions/checkout@v4
-
-    - name: Install Python
-      uses: actions/setup-python@v5
-      with: { python-version: "3.12" }
-
-    - name: Install LLVM 18
-      run: |
-          wget -qO- https://apt.llvm.org/llvm-snapshot.gpg.key | sudo tee /etc/apt/trusted.gpg.d/apt.llvm.org.asc
-          sudo apt-add-repository "deb http://apt.llvm.org/jammy/ llvm-toolchain-jammy-18 main"
-          sudo apt update
-          sudo apt install llvm-18 llvm-18-dev llvm-18-tools clang-18 clang-tidy-18 clang-format-18 clang-tools-18 libclang-18-dev -y
-
-    - name: Conan cache
-      uses: actions/cache@v4
-      with:
-        path: conan_cache_save.tgz
-        key: conan-sanitize-${{ hashFiles('conan*.[pl][yo]*') }}
-
-    - name: Install dependencies
-      run: bash < .github/scripts/conan-ci-setup.sh
-
-    - name: Configure
-      run: cmake --preset=ci-sanitize
-
-    - name: Build
-      run: cmake --build build/sanitize -j 2
-
-    - name: Test
-      working-directory: build/sanitize
-      env:
-        ASAN_OPTIONS: "strict_string_checks=1:\
-          detect_stack_use_after_return=1:\
-          check_initialization_order=1:\
-          strict_init_order=1:\
-          detect_leaks=1:\
-          halt_on_error=1"
-        UBSAN_OPTIONS: "print_stacktrace=1:\
-          halt_on_error=1"
-      run: ctest --output-on-failure --no-tests=error -j 2
-
-  test:
+  test-avx512:
     needs: [lint]
 
     strategy:
@@ -113,14 +64,10 @@ jobs:
         /usr/bin/clang-tidy clang-tidy
         /usr/bin/clang-tidy-18 140
 
-    - name: Install Python
-      uses: actions/setup-python@v5
-      with: { python-version: "3.12" }
-
     - name: Conan cache
       uses: actions/cache@v4
       with:
-        path: conan_cache_save.tgz
+        path: conan_cache_save-${{ matrix.os}}.tgz
         key: conan-${{ matrix.os }}-${{ hashFiles('conan*.[pl][yo]*') }}
 
     - name: Install dependencies
@@ -129,10 +76,17 @@ jobs:
 
     - name: Configure
       shell: pwsh
-      run: cmake "--preset=ci-$("${{ matrix.os }}".split("-")[0])"
+      run: |
+        $output = cmake -DENABLE_SIMD=ON "--preset=ci-$("${{ matrix.os }}".split("-")[0])"
+        Write-Output $output
+        if ($output -match "AVX-512 is supported") {
+            Write-Output "AVX512 is enabled"
+        } else {
+            throw "AVX512 is not available"
+        }
 
     - name: Build
-      run: cmake --build build --config Release -j 2
+      run: cmake --build build --config Release -j 4
 
     - name: Install
       run: cmake --install build --config Release --prefix prefix
@@ -141,3 +95,128 @@ jobs:
       working-directory: build
       run: ctest --output-on-failure --no-tests=error -C Release -j 2
 
+  test-nosimd:
+    needs: [lint]
+
+    strategy:
+      matrix:
+        os: [ubuntu-22.04]
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install LLVM 18
+      run: |
+          wget -qO- https://apt.llvm.org/llvm-snapshot.gpg.key | sudo tee /etc/apt/trusted.gpg.d/apt.llvm.org.asc
+          sudo apt-add-repository "deb http://apt.llvm.org/jammy/ llvm-toolchain-jammy-18 main"
+          sudo apt update
+          sudo apt install llvm-18 llvm-18-dev llvm-18-tools clang-18 clang-tidy-18 clang-format-18 clang-tools-18 libclang-18-dev -y
+
+    - name: Install static analyzers
+      if: matrix.os == 'ubuntu-22.04'
+      run: >-
+        sudo apt-get install clang-tidy-18 cppcheck -y -q
+
+        sudo update-alternatives --install
+        /usr/bin/clang-tidy clang-tidy
+        /usr/bin/clang-tidy-18 140
+
+    - name: Conan cache
+      uses: actions/cache@v4
+      with:
+        path: conan_cache_save-${{ matrix.os}}.tgz
+        key: conan-${{ matrix.os }}-${{ hashFiles('conan*.[pl][yo]*') }}
+
+    - name: Install dependencies
+      shell: bash
+      run: bash < .github/scripts/conan-ci-setup.sh
+
+    - name: Configure
+      shell: pwsh
+      run: |
+        $output = cmake -DENABLE_SIMD=OFF "--preset=ci-$("${{ matrix.os }}".split("-")[0])"
+        Write-Output $output
+        if ($output -match "SIMD is not supported by the compiler") {
+            Write-Output "SIMD is disabled"
+        } else {
+            throw "SIMD is enabled when it should not be"
+        }
+
+    - name: Build
+      run: cmake --build build --config Release -j 4
+
+    - name: Install
+      run: cmake --install build --config Release --prefix prefix
+
+    - name: Test
+      working-directory: build
+      run: ctest --output-on-failure --no-tests=error -C Release -j 2
+
+  test-neon:
+    needs: [lint]
+
+    strategy:
+      matrix:
+        os: [macos-14]
+
+    runs-on: ${{ matrix.os }}
+
+    env:
+      CC: /opt/homebrew/opt/llvm@18/bin/clang
+      CXX: /opt/homebrew/opt/llvm@18/bin/clang++
+      CLANG_DIR: '/opt/homebrew/opt/llvm@18/bin/clang'
+      LLVM_DIR: '/opt/homebrew/opt/llvm@18'
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install LLVM 18
+      run: |
+          brew install llvm@18
+
+    - name: Verify Installation
+      run: |
+          ${{ env.CC }} --version
+          ${{ env.CXX }} --version
+
+    - name: Install static analyzers
+      if: matrix.os == 'macos-14'
+      run: >-
+        brew install cppcheck
+
+    - name: Install Python
+      uses: actions/setup-python@v5
+      with: { python-version: "3.12" }
+
+    - name: Conan cache
+      uses: actions/cache@v4
+      with:
+        path: conan_cache_save-${{ matrix.os}}.tgz
+        key: conan-${{ matrix.os }}-${{ hashFiles('conan*.[pl][yo]*') }}
+
+    - name: Install dependencies
+      shell: bash
+      run: bash < .github/scripts/conan-ci-setup.sh
+
+    - name: Configure
+      shell: pwsh
+      run: |
+        $output = cmake -DENABLE_SIMD=OFF "--preset=ci-$("${{ matrix.os }}".split("-")[0])"
+        Write-Output $output
+        if ($output -match "ARM NEON is supported by the compiler") {
+            Write-Output "ARM NEON is enabled"
+        } else {
+            throw "ARM NEON is not available"
+        }
+
+    - name: Build
+      run: cmake --build build --config Release -j 4
+
+    - name: Install
+      run: cmake --install build --config Release --prefix prefix
+
+    - name: Test
+      working-directory: build
+      run: ctest --output-on-failure --no-tests=error -C Release -j 2
