@@ -61,11 +61,9 @@ target_compile_features(fractal-generator_lib PUBLIC cxx_std_23)
 
 find_package(fmt REQUIRED)
 find_package(argparse REQUIRED)
-find_package(Boost REQUIRED)
 find_package(SFML REQUIRED graphics CONFIG)
 target_link_libraries(fractal-generator_lib PRIVATE fmt::fmt)
 target_link_libraries(fractal-generator_lib PRIVATE argparse::argparse)
-target_link_libraries(fractal-generator_lib PRIVATE boost::boost)
 target_link_libraries(fractal-generator_lib PRIVATE sfml-graphics)
 
 # ---- Declare executable ----
@@ -81,7 +79,6 @@ target_link_libraries(fractal-generator_exe PRIVATE fmt::fmt)
 target_link_libraries(fractal-generator_exe PRIVATE fractal-generator_lib)
 target_link_libraries(fractal-generator_exe PRIVATE argparse::argparse)
 target_link_libraries(fractal-generator_exe PRIVATE sfml-graphics)
-target_link_libraries(fractal-generator_exe PRIVATE boost::boost)
 
 # ---- Install rules ----
 
