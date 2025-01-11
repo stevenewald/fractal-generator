@@ -28,18 +28,15 @@ std::array<iteration_count, 8> compute_iterations(
     __mmask8 active_mask = 0xFF;
 
     for (iteration_count iterations = 0; iterations < max_iters; iterations++) {
-        // load current values
-        __m512d x = input_vec_real;
-        __m512d y = input_vec_imag;
-
         // compute squares and product
-        __m512d x_squared = _mm512_mul_pd(x, x);
-        __m512d y_squared = _mm512_mul_pd(y, y);
-        __m512d xy = _mm512_mul_pd(x, y);
+        __m512d x_squared = _mm512_mul_pd(input_vec_real, input_vec_real);
+        __m512d y_squared = _mm512_mul_pd(input_vec_imag, input_vec_imag);
+        __m512d xy = _mm512_mul_pd(input_vec_real, input_vec_imag);
 
         // update real part: input_vec_real = x_squared - y_squared + constant_reals
-        __m512d temp_real = _mm512_sub_pd(x_squared, y_squared);
-        input_vec_real = _mm512_add_pd(temp_real, input_vec_constant_reals);
+        input_vec_real = _mm512_add_pd(
+            _mm512_sub_pd(x_squared, y_squared), input_vec_constant_reals
+        );
 
         // update imaginary part: input_vec_imag = 2 * xy + constant_imags
         input_vec_imag =
@@ -49,24 +46,21 @@ std::array<iteration_count, 8> compute_iterations(
         __m512d squared_norms_vec = _mm512_add_pd(x_squared, y_squared);
 
         // determine which elements have diverged
-        __mmask8 solved_mask =
-            _mm512_cmp_pd_mask(squared_norms_vec, squared_divergence_vec, _CMP_GT_OS);
+        active_mask =
+            _mm512_cmp_pd_mask(squared_norms_vec, squared_divergence_vec, _CMP_LE_OS);
 
         // update iteration counts for elements that have just diverged
         solved_its_vec = _mm_mask_blend_epi16(
-            solved_mask, solved_its_vec,
+            active_mask, solved_its_vec,
             _mm_set1_epi16(static_cast<int16_t>(iterations))
         );
-
-        // update active mask to skip computations for diverged elements
-        active_mask = _kandn_mask8(solved_mask, active_mask);
 
         // break if all elements have diverged
         if (active_mask == 0) [[unlikely]]
             break;
     }
 
-    __mmask8 mask = _mm_cmpeq_epi16_mask(solved_its_vec, _mm_set1_epi16(0));
+    __mmask8 mask = _mm_cmpeq_epi16_mask(solved_its_vec, _mm_set1_epi16(max_iters - 1));
     solved_its_vec = _mm_mask_mov_epi16(
         solved_its_vec, mask, _mm_set1_epi16(static_cast<int16_t>(max_iters))
     );

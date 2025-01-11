@@ -14,7 +14,7 @@ include(cmake/project-is-top-level.cmake)
 include(cmake/variables.cmake)
 
 set(CMAKE_INTERPROCEDURAL_OPTIMIZATION ON)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=rocketlake")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native")
 # add_compile_options(-fno-inline -fno-omit-frame-pointer)
 
 
