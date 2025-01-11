@@ -23,7 +23,7 @@ static void BM_GenerateMandelbrotSimd(benchmark::State& state)
     for (auto _ : state) {
         for (auto it = display.begin(); it != display.end(); it += 8) {
             benchmark::DoNotOptimize(
-                compute_iterations(start, t.to_complex_projections(*it), 100)
+                compute_iterations(start, t.to_complex_projections(*it), 5000)
             );
         }
         prox += display.size();

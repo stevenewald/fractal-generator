@@ -39,7 +39,7 @@ check_cxx_source_compiles("
             return 0;
 		}" HAS_NEON)
 
-if (HAS_ALL_AVX512)
+if (HAS_AVX512)
     message(STATUS "AVX-512 is supported by the compiler.")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mavx512f -mavx512dq -mavx512vl -mavx512bf16")
 	target_sources(fractal-generator_lib PRIVATE source/mandelbrot/equations_simd.cpp)
