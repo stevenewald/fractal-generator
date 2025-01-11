@@ -23,7 +23,7 @@ std::array<iteration_count, 8> compute_iterations(
     __m512d input_vec_constant_imags = _mm512_load_pd(const_imags.data());
     __m512d input_vec_constant_reals = _mm512_load_pd(const_reals.data());
 
-    __m128i solved_its_vec = _mm_set1_epi16(0);
+    __m256i solved_its_vec = _mm256_set1_epi32(0);
     const __m512d squared_divergence_vec = _mm512_set1_pd(SQUARED_DIVERGENCE);
     __mmask8 active_mask = 0xFF;
 
@@ -50,9 +50,8 @@ std::array<iteration_count, 8> compute_iterations(
             _mm512_cmp_pd_mask(squared_norms_vec, squared_divergence_vec, _CMP_LE_OS);
 
         // update iteration counts for elements that have just diverged
-        solved_its_vec = _mm_mask_blend_epi16(
-            active_mask, solved_its_vec,
-            _mm_set1_epi16(static_cast<int16_t>(iterations))
+        solved_its_vec = _mm256_mask_blend_epi32(
+            active_mask, solved_its_vec, _mm256_set1_epi32(static_cast<int>(iterations))
         );
 
         // break if all elements have diverged
@@ -60,13 +59,15 @@ std::array<iteration_count, 8> compute_iterations(
             break;
     }
 
-    __mmask8 mask = _mm_cmpeq_epi16_mask(solved_its_vec, _mm_set1_epi16(max_iters - 1));
-    solved_its_vec = _mm_mask_mov_epi16(
-        solved_its_vec, mask, _mm_set1_epi16(static_cast<int16_t>(max_iters))
+    __mmask8 mask = _mm256_cmpeq_epi32_mask(
+        solved_its_vec, _mm256_set1_epi32(static_cast<int>(max_iters) - 1)
+    );
+    solved_its_vec = _mm256_mask_mov_epi32(
+        solved_its_vec, mask, _mm256_set1_epi32(static_cast<int16_t>(max_iters))
     );
 
-    alignas(16) std::array<iteration_count, 8> ret{};
-    _mm_storeu_epi16(ret.data(), solved_its_vec);
+    alignas(32) std::array<iteration_count, 8> ret{};
+    _mm256_storeu_epi32(ret.data(), solved_its_vec);
 
     return ret;
 }
