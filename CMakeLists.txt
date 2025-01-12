@@ -15,6 +15,7 @@ include(cmake/variables.cmake)
 
 set(CMAKE_INTERPROCEDURAL_OPTIMIZATION ON)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native")
+
 # add_compile_options(-fno-inline -fno-omit-frame-pointer)
 
 
@@ -60,9 +61,15 @@ target_include_directories(
 target_compile_features(fractal-generator_lib PUBLIC cxx_std_23)
 
 find_package(fmt REQUIRED)
+find_package(Boost REQUIRED)
 find_package(argparse REQUIRED)
 find_package(SFML REQUIRED graphics CONFIG)
+set_target_properties(boost::boost PROPERTIES
+    INTERFACE_COMPILE_OPTIONS "-fno-lto"
+    INTERFACE_LINK_OPTIONS "-fno-lto"
+)
 target_link_libraries(fractal-generator_lib PRIVATE fmt::fmt)
+target_link_libraries(fractal-generator_lib PRIVATE boost::boost)
 target_link_libraries(fractal-generator_lib PRIVATE argparse::argparse)
 target_link_libraries(fractal-generator_lib PRIVATE sfml-graphics)
 
@@ -76,6 +83,7 @@ set_property(TARGET fractal-generator_exe PROPERTY OUTPUT_NAME fractal-generator
 target_compile_features(fractal-generator_exe PRIVATE cxx_std_23)
 
 target_link_libraries(fractal-generator_exe PRIVATE fmt::fmt)
+target_link_libraries(fractal-generator_exe PRIVATE boost::boost)
 target_link_libraries(fractal-generator_exe PRIVATE fractal-generator_lib)
 target_link_libraries(fractal-generator_exe PRIVATE argparse::argparse)
 target_link_libraries(fractal-generator_exe PRIVATE sfml-graphics)
